@@ -12,7 +12,7 @@ dialog{border:0;border-radius:17px;padding:0;width:min(550px,calc(100% - 18px));
 @media(max-width:600px){.app{padding:8px}.houses{grid-template-columns:repeat(2,1fr);gap:6px}.house{min-height:105px;padding:9px}.grid{grid-template-columns:repeat(3,1fr);gap:5px}.body h3{font-size:10px}.meta{font-size:9px}.topbar h2{font-size:17px}.toolbar{display:grid;grid-template-columns:1fr auto}.toolbar input{grid-column:1/-1;width:100%}.modebar{display:grid;grid-template-columns:1fr 1fr}.cats{grid-template-columns:repeat(2,1fr)}.fields{grid-template-columns:1fr}.full{grid-column:auto}}
 </style></head><body><div id="busy">Caricamento…</div><div class="app">
 <section id="auth" class="view active"><div class="card auth"><h2>Guardaroba</h2><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password"><div class="row"><button id="login" class="primary">Accedi</button><button id="signup" class="ghost">Crea account</button></div><div id="authmsg" class="muted"></div></div></section>
-<section id="app" class="view"><header><div><h1>Guardaroba</h1><div class="muted"><span id="user"></span> · versione 2.1.2</div></div><div class="row"><button id="bagBtn" class="soft">🧳 Valigia</button><button id="excelBtn" class="ghost">Excel</button><button id="logout" class="ghost">Esci</button></div></header><input id="excel" type="file" accept=".xlsx,.xls" hidden>
+<section id="app" class="view"><header><div><h1>Guardaroba</h1><div class="muted"><span id="user"></span> · versione 2.1.3</div></div><div class="row"><button id="bagBtn" class="soft">🧳 Valigia</button><button id="excelBtn" class="ghost">Excel</button><button id="logout" class="ghost">Esci</button></div></header><input id="excel" type="file" accept=".xlsx,.xls" hidden>
 <section id="home" class="view active"><div class="global"><input id="gsearch" placeholder="🔎 Cerca in tutte le case…"><div id="gres" class="results"></div><button id="gmore" class="ghost more" style="display:none">Altri risultati</button></div><div id="houses" class="houses"></div></section>
 <section id="house" class="view"><div class="topbar"><button id="back" class="ghost">←</button><h2 id="htitle"></h2><div class="grow"></div><button id="historyBtn" class="ghost">↩</button><button id="add" class="primary">＋</button></div><div id="controls"><div class="toolbar"><input id="search" placeholder="Cerca in questa casa…"><button id="selectall" class="ghost">✓ Tutti</button></div><div id="items" class="grid"></div><button id="more" class="ghost more" style="display:none">Carica altri</button></div><div id="transfer" class="transfer"><b id="selcount"></b><div class="grow"></div><select id="dest"></select><button id="move" class="soft">Sposta</button></div></section>
 <section id="bag" class="view"><div class="topbar"><button id="bagback" class="ghost">←</button><h2>🧳 Valigia</h2><div class="grow"></div><button id="clearbag" class="danger">Svuota</button></div><div class="muted" style="margin-bottom:8px">Lista virtuale: non modifica la posizione fisica dei capi.</div><div id="baglist" class="baglist"></div><button id="bagmore" class="ghost more" style="display:none">Carica altri</button><div class="bagbar"><b id="bagsel">0 selezionati</b><div class="grow"></div><select id="bagdest"></select><button id="bagmove" class="soft">Sposta selezionati</button></div></section></section></div>
@@ -58,6 +58,28 @@ $('#login').addEventListener('click',doLogin);
 $('#signup').addEventListener('click',doSignup);
 $('#password').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
 function main(id){['auth','app'].forEach(x=>$('#'+x).classList.toggle('active',x===id))}function page(id){['home','house','bag'].forEach(x=>$('#'+x).classList.toggle('active',x===id))}
+
+async function init(){
+ try{
+  const {data:{session},error}=await sb.auth.getSession();
+  if(error)throw error;
+  if(session)await enter(session.user);else main('auth');
+  sb.auth.onAuthStateChange(async(_,s)=>{try{if(s?.user&&!user)await enter(s.user);if(!s){user=null;main('auth')}}catch(err){console.error('Auth state error',err)}})
+ }catch(err){console.error('Init error',err);main('auth');$('#authmsg').textContent='Errore inizializzazione: '+(err?.message||String(err))}
+}
+async function enter(u){
+ user=u;$('#user').textContent=u.email||'';main('app');
+ try{await loadHouses();home()}catch(err){console.error('Enter error',err);alert('Accesso riuscito, ma errore nel caricamento: '+(err?.message||String(err)))}
+}
+async function loadHouses(){const {data,error}=await sb.rpc('lista_case_con_conteggi');if(error)throw error;houses=data||[]}
+function home(){
+ page('home');hid=null;selected.clear();
+ $('#houses').innerHTML=houses.map(h=>`<button class="card house" data-h="${h.id}"><div><div class="ico" id="hi-${h.id}">${h.foto_path?'…':esc(h.icona||'🏠')}</div><div class="name">${esc(h.nome)}</div></div><div class="muted">${h.totale||0} pezzi</div></button>`).join('')+`<button id="newhouse" class="card house new"><b>＋ Aggiungi casa</b></button>`;
+ document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>openHouse(b.dataset.h));$('#newhouse').onclick=addHouse;
+ houses.filter(h=>h.foto_path).forEach(h=>surl(h.foto_path).then(u=>{const e=$('#hi-'+h.id);if(e&&u)e.innerHTML=`<img src="${u}" loading="lazy">`}))
+}
+async function addHouse(){const nome=(prompt('Nome casa:')||'').trim();if(!nome)return;const icona=(prompt('Emoji casa:','🏠')||'🏠').trim();const {error}=await sb.from('case').insert({user_id:user.id,nome,icona});if(error)return alert(error.message);await loadHouses();home()}
+
 const signedCache=new Map();
 async function surl(p){
  if(!p)return null;
