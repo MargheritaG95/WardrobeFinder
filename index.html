@@ -12,7 +12,7 @@ dialog{border:0;border-radius:17px;padding:0;width:min(550px,calc(100% - 18px));
 @media(max-width:600px){.app{padding:8px}.houses{grid-template-columns:repeat(2,1fr);gap:6px}.house{min-height:105px;padding:9px}.grid{grid-template-columns:repeat(3,1fr);gap:5px}.body h3{font-size:10px}.meta{font-size:9px}.topbar h2{font-size:17px}.toolbar{display:grid;grid-template-columns:1fr auto}.toolbar input{grid-column:1/-1;width:100%}.modebar{display:grid;grid-template-columns:1fr 1fr}.cats{grid-template-columns:repeat(2,1fr)}.fields{grid-template-columns:1fr}.full{grid-column:auto}}
 </style></head><body><div id="busy">Caricamento…</div><div class="app">
 <section id="auth" class="view active"><div class="card auth"><h2>Guardaroba</h2><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password"><div class="row"><button id="login" class="primary">Accedi</button><button id="signup" class="ghost">Crea account</button></div><div id="authmsg" class="muted"></div></div></section>
-<section id="app" class="view"><header><div><h1>Guardaroba</h1><div class="muted"><span id="user"></span> · versione 2.1.1</div></div><div class="row"><button id="bagBtn" class="soft">🧳 Valigia</button><button id="excelBtn" class="ghost">Excel</button><button id="logout" class="ghost">Esci</button></div></header><input id="excel" type="file" accept=".xlsx,.xls" hidden>
+<section id="app" class="view"><header><div><h1>Guardaroba</h1><div class="muted"><span id="user"></span> · versione 2.1.2</div></div><div class="row"><button id="bagBtn" class="soft">🧳 Valigia</button><button id="excelBtn" class="ghost">Excel</button><button id="logout" class="ghost">Esci</button></div></header><input id="excel" type="file" accept=".xlsx,.xls" hidden>
 <section id="home" class="view active"><div class="global"><input id="gsearch" placeholder="🔎 Cerca in tutte le case…"><div id="gres" class="results"></div><button id="gmore" class="ghost more" style="display:none">Altri risultati</button></div><div id="houses" class="houses"></div></section>
 <section id="house" class="view"><div class="topbar"><button id="back" class="ghost">←</button><h2 id="htitle"></h2><div class="grow"></div><button id="historyBtn" class="ghost">↩</button><button id="add" class="primary">＋</button></div><div id="controls"><div class="toolbar"><input id="search" placeholder="Cerca in questa casa…"><button id="selectall" class="ghost">✓ Tutti</button></div><div id="items" class="grid"></div><button id="more" class="ghost more" style="display:none">Carica altri</button></div><div id="transfer" class="transfer"><b id="selcount"></b><div class="grow"></div><select id="dest"></select><button id="move" class="soft">Sposta</button></div></section>
 <section id="bag" class="view"><div class="topbar"><button id="bagback" class="ghost">←</button><h2>🧳 Valigia</h2><div class="grow"></div><button id="clearbag" class="danger">Svuota</button></div><div class="muted" style="margin-bottom:8px">Lista virtuale: non modifica la posizione fisica dei capi.</div><div id="baglist" class="baglist"></div><button id="bagmore" class="ghost more" style="display:none">Carica altri</button><div class="bagbar"><b id="bagsel">0 selezionati</b><div class="grow"></div><select id="bagdest"></select><button id="bagmove" class="soft">Sposta selezionati</button></div></section></section></div>
@@ -20,7 +20,44 @@ dialog{border:0;border-radius:17px;padding:0;width:min(550px,calc(100% - 18px));
 <dialog id="histdlg"><div class="dialog"><div class="formhead"><h2>Ultimo trasferimento</h2><button id="closehist" class="ghost">✕</button></div><div id="hist"></div><div class="actions"><button id="undo" class="primary">Riporta indietro</button></div></div></dialog>
 <script>
 const sb=supabase.createClient("https://atupzrgrgojvztbcrlua.supabase.co","sb_publishable_5slDv8ZTohQD_16E2r7pdw_m6jijofi"),$=s=>document.querySelector(s),PAGE=60;let user=null,houses=[],hid=null,items=[],offset=0,hasmore=false,selected=new Set(),photoPath=null,gtimer=null,goffset=0,bag=[],boffset=0,bsel=new Set(),lastBatch=null;
-const busy=v=>$('#busy').classList.toggle('show',v),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));function main(id){['auth','app'].forEach(x=>$('#'+x).classList.toggle('active',x===id))}function page(id){['home','house','bag'].forEach(x=>$('#'+x).classList.toggle('active',x===id))}
+const busy=v=>$('#busy').classList.toggle('show',v),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+async function doLogin(){
+ const btn=$('#login'),email=$('#email').value.trim(),password=$('#password').value;
+ $('#authmsg').textContent='';
+ if(!email||!password){$('#authmsg').textContent='Inserisci email e password.';return}
+ btn.disabled=true;btn.textContent='Accesso…';
+ try{
+   const {data,error}=await sb.auth.signInWithPassword({email,password});
+   if(error)throw error;
+   if(!data?.session)throw new Error('Accesso non completato.');
+   $('#authmsg').textContent='Accesso riuscito.';
+   await enter(data.user);
+ }catch(err){
+   console.error('Login error',err);
+   $('#authmsg').textContent='Errore accesso: '+(err?.message||String(err));
+ }finally{
+   btn.disabled=false;btn.textContent='Accedi';
+ }
+}
+async function doSignup(){
+ const btn=$('#signup'),email=$('#email').value.trim(),password=$('#password').value;
+ $('#authmsg').textContent='';
+ if(!email||!password){$('#authmsg').textContent='Inserisci email e password.';return}
+ btn.disabled=true;
+ try{
+   const {data,error}=await sb.auth.signUp({email,password});
+   if(error)throw error;
+   $('#authmsg').textContent=data?.session?'Account creato e accesso effettuato.':'Account creato: controlla la tua email.';
+   if(data?.session)await enter(data.user);
+ }catch(err){
+   console.error('Signup error',err);
+   $('#authmsg').textContent='Errore: '+(err?.message||String(err));
+ }finally{btn.disabled=false}
+}
+$('#login').addEventListener('click',doLogin);
+$('#signup').addEventListener('click',doSignup);
+$('#password').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+function main(id){['auth','app'].forEach(x=>$('#'+x).classList.toggle('active',x===id))}function page(id){['home','house','bag'].forEach(x=>$('#'+x).classList.toggle('active',x===id))}
 const signedCache=new Map();
 async function surl(p){
  if(!p)return null;
@@ -65,7 +102,7 @@ function renderBag(){$('#bagdest').innerHTML=houses.map(h=>`<option value="${h.i
 async function moveBag(){const m=[];for(const id of bsel){const x=bag.find(z=>z.valigia_id===id);if(x.casa_id===$('#bagdest').value)return alert(`${x.nome} è già nella casa scelta`);let q=x.quantita_valigia;if(q>1){const a=prompt(`Quanti "${x.nome}" spostare davvero? Valigia: ${q}, disponibili: ${x.quantita_disponibile}`,q);if(a===null)return;q=parseInt(a)}if(!Number.isInteger(q)||q<1||q>x.quantita_disponibile)return alert('Quantità non valida');m.push({vestito_id:x.vestito_id,quantita:q})}if(!m.length)return;busy(true);const{error}=await sb.rpc('sposta_capi',{p_movimenti:m,p_destinazione:$('#bagdest').value});busy(false);if(error)return alert(error.message);await Promise.all([loadHouses(),loadBag(true)]);alert('Spostamento completato. La Valigia resta una lista indipendente.')}
 async function gsearch(reset=true){const q=$('#gsearch').value.trim();if(!q){$('#gres').innerHTML='';$('#gmore').style.display='none';goffset=0;return}if(reset)goffset=0;const{data,error}=await sb.rpc('cerca_vestiti_globale_v21',{p_query:q,p_limit:40,p_offset:goffset});if(error)return;if(reset)$('#gres').innerHTML='';$('#gres').insertAdjacentHTML('beforeend',(data||[]).map(x=>`<button class="card hit" data-gh="${x.casa_id}"><div class="grow"><b>${esc(x.nome)}</b><div class="meta">${esc(x.marca||'Senza marca')} · quantità ${x.quantita} · ${esc(x.casa_nome)}</div></div>›</button>`).join(''));document.querySelectorAll('[data-gh]').forEach(b=>b.onclick=()=>openHouse(b.dataset.gh));goffset+=(data||[]).length;$('#gmore').style.display=(data||[]).length===40?'block':'none'}
 async function history(){const{data,error}=await sb.from('trasferimenti').select('batch_id,created_at,da_casa_id,a_casa_id').eq('user_id',user.id).order('created_at',{ascending:false}).limit(1).maybeSingle();if(error)return alert(error.message);lastBatch=data?.batch_id||null;$('#hist').innerHTML=data?`<div class="card" style="padding:11px"><b>${esc(houses.find(h=>h.id===data.da_casa_id)?.nome||'Casa')} → ${esc(houses.find(h=>h.id===data.a_casa_id)?.nome||'Casa')}</b><div class="meta">${new Date(data.created_at).toLocaleString('it-IT')}</div></div>`:'<div class="empty">Nessun trasferimento</div>';$('#undo').style.display=data?'inline-block':'none';$('#histdlg').showModal()}
-$('#login').onclick=async()=>{const{error}=await sb.auth.signInWithPassword({email:$('#email').value.trim(),password:$('#password').value});$('#authmsg').textContent=error?.message||''};$('#signup').onclick=async()=>{const{error}=await sb.auth.signUp({email:$('#email').value.trim(),password:$('#password').value});$('#authmsg').textContent=error?.message||'Controlla la tua email'};$('#logout').onclick=()=>sb.auth.signOut();$('#back').onclick=home;$('#add').onclick=()=>openItem();$('#search').oninput=()=>{clearTimeout(gtimer);gtimer=setTimeout(async()=>{await loadItems(true);renderHouse()},220)};$('#more').onclick=async()=>{await loadItems(false);renderHouse()};$('#selectall').onclick=()=>{const ids=items.map(x=>x.id),a=ids.every(x=>selected.has(x));ids.forEach(x=>a?selected.delete(x):selected.add(x));renderHouse()};$('#move').onclick=move;
+$('#logout').addEventListener('click',()=>sb.auth.signOut());$('#back').onclick=home;$('#add').onclick=()=>openItem();$('#search').oninput=()=>{clearTimeout(gtimer);gtimer=setTimeout(async()=>{await loadItems(true);renderHouse()},220)};$('#more').onclick=async()=>{await loadItems(false);renderHouse()};$('#selectall').onclick=()=>{const ids=items.map(x=>x.id),a=ids.every(x=>selected.has(x));ids.forEach(x=>a?selected.delete(x):selected.add(x));renderHouse()};$('#move').onclick=move;
 $('#camera').onclick=()=>$('#pcamera').click();$('#library').onclick=()=>$('#plibrary').click();function prev(e){const f=e.target.files[0];if(f){$('#preview').src=URL.createObjectURL(f);$('#preview').style.display='block'}}$('#pcamera').onchange=prev;$('#plibrary').onchange=prev;$('#closeitem').onclick=$('#cancelitem').onclick=()=>$('#itemdlg').close();$('#deleteitem').onclick=async()=>{const id=$('#itemid').value;if(!confirm('Eliminare?'))return;const{error}=await sb.from('vestiti').delete().eq('id',id);if(error)return alert(error.message);$('#itemdlg').close();await Promise.all([loadHouses(),loadItems(true)]);renderHouse()};
 $('#bagBtn').onclick=async()=>{page('bag');await loadBag(true)};$('#bagback').onclick=home;$('#bagmore').onclick=()=>loadBag(false);$('#clearbag').onclick=async()=>{if(confirm('Svuotare la Valigia?')){await sb.from('valigia').delete().eq('user_id',user.id);await loadBag(true)}};$('#bagmove').onclick=moveBag;$('#gsearch').oninput=()=>{clearTimeout(gtimer);gtimer=setTimeout(()=>gsearch(true),220)};$('#gmore').onclick=()=>gsearch(false);$('#historyBtn').onclick=history;$('#closehist').onclick=()=>$('#histdlg').close();$('#undo').onclick=async()=>{if(!lastBatch)return;busy(true);const{error}=await sb.rpc('annulla_trasferimento_batch',{p_batch:lastBatch});busy(false);if(error)return alert(error.message);$('#histdlg').close();await Promise.all([loadHouses(),loadItems(true)]);renderHouse()};
 $('#excelBtn').onclick=()=>$('#excel').click();$('#excel').onchange=async e=>{const f=e.target.files[0];if(!f)return;busy(true);try{const wb=XLSX.read(await f.arrayBuffer(),{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});for(const raw of rows){const n={};Object.keys(raw).forEach(k=>n[k.trim().toLowerCase()]=raw[k]);const hn=String(n.casa||'').trim(),nome=String(n['nome capo']||n.nome||'').trim();if(!hn||!nome)continue;let h=houses.find(x=>x.nome.toLowerCase()===hn.toLowerCase());if(!h){const r=await sb.from('case').insert({user_id:user.id,nome:hn,icona:'🏠'}).select().single();if(r.error)throw r.error;h=r.data;houses.push(h)}const r=await sb.from('vestiti').insert({user_id:user.id,casa_id:h.id,nome,marca:String(n.marca||'').trim()||null,quantita:Math.max(1,parseInt(n['quantità']||n.quantita||1)||1),colore:String(n.colore||'').trim()||null,descrizione:String(n.descrizione||n.note||'').trim()||null});if(r.error)throw r.error}await loadHouses();home();alert('Importazione completata')}catch(x){alert(x.message||x)}finally{busy(false)}};
