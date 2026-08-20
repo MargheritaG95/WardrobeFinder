@@ -1,370 +1,48 @@
-<!doctype html>
-<html lang="it">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#171717">
-<link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./icon-192.png">
-<title>Guardaroba</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#171717"><link rel="manifest" href="./manifest.json"><link rel="apple-touch-icon" href="./icon-192.png"><title>Guardaroba</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
-:root{--bg:#f7f6f2;--card:#fff;--text:#202124;--muted:#70757d;--line:#e6e2da;--dark:#171717;--soft:#efede7;--danger:#991b1b;--r:20px}
-*{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text)}
-button,input,select,textarea{font:inherit}button{cursor:pointer} .app{max-width:1100px;margin:auto;padding:18px}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}h1{margin:0;font-size:clamp(28px,5vw,42px);letter-spacing:-.04em}.sub,.muted{color:var(--muted);font-size:14px}
-.primary,.secondary,.ghost,.danger{border:0;border-radius:12px;padding:11px 14px;font-weight:750}.primary{background:var(--dark);color:white}.secondary{background:var(--soft)}.ghost{background:white;border:1px solid var(--line)}.danger{background:#fee2e2;color:var(--danger)}
-.view{display:none}.view.active{display:block} .card{background:white;border:1px solid var(--line);border-radius:var(--r);box-shadow:0 10px 30px rgba(0,0,0,.06)}
-.auth{max-width:430px;margin:9vh auto;padding:25px}.auth h2{margin:0 0 6px}.auth input{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;margin:7px 0}.auth-actions{display:flex;gap:8px;margin-top:10px}#authMsg{margin-top:10px;min-height:20px}
-.houses{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:15px}.house{padding:20px;min-height:170px;text-align:left;display:flex;flex-direction:column;justify-content:space-between}.house:hover{transform:translateY(-1px)}.house .ico{font-size:38px;width:58px;height:58px;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--soft)}.house .ico img{width:100%;height:100%;object-fit:cover}.house .name{font-size:21px;font-weight:850;margin-top:14px}.new{border-style:dashed;background:transparent;box-shadow:none;align-items:center;justify-content:center;color:var(--muted)}
-.topbar,.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:15px}.topbar h2{margin:0;font-size:26px}.grow{flex:1}.toolbar input,.toolbar select{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:white}.search{flex:1;min-width:180px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px}.category-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:16px}.category-card{padding:18px;text-align:left;min-height:130px;display:flex;flex-direction:column;justify-content:space-between}.category-card .folder{font-size:34px}.category-card .catname{font-size:18px;font-weight:850;margin-top:10px}.modebar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.modebar button.active{background:var(--dark);color:white}.item{overflow:hidden;position:relative}.thumb{aspect-ratio:1/1;background:#eceae5;display:flex;align-items:center;justify-content:center;color:#999;overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover}.body{padding:9px}.body h3{font-size:14px}.item .meta{font-size:11px}.item button{font-size:12px}.body h3{margin:0 0 5px;font-size:16px}.meta{font-size:13px;color:var(--muted);line-height:1.45}.check{position:absolute;left:10px;top:10px;width:24px;height:24px;accent-color:#111;z-index:2}.edit{width:100%;margin-top:9px;padding:8px}
-.transfer{display:none;position:sticky;bottom:12px;background:#171717;color:#fff;border-radius:16px;padding:12px;gap:10px;align-items:center;margin-top:15px;box-shadow:0 14px 35px rgba(0,0,0,.2);z-index:5}.transfer.show{display:flex}.transfer select{padding:9px;border:0;border-radius:10px}
-.empty{grid-column:1/-1;text-align:center;padding:50px 15px;color:var(--muted)}.empty .emoji{font-size:42px}
-dialog{border:0;border-radius:20px;padding:0;width:min(570px,calc(100% - 24px));box-shadow:0 30px 80px rgba(0,0,0,.28)}dialog::backdrop{background:rgba(0,0,0,.38)}form,.dialog-body{padding:22px}.formhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.formhead h2{margin:0}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}label{display:block;font-size:13px;font-weight:750;margin-bottom:5px}.fields input,.fields select,.fields textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:11px}textarea{min-height:80px;resize:vertical}.preview{display:none;width:100%;max-height:240px;object-fit:cover;border-radius:13px;margin-top:8px}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}#cameraBtn,#libraryBtn{flex:1;white-space:nowrap;font-size:12px}
-.history-item{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:9px;margin-top:8px}.history-thumb{width:52px;height:52px;border-radius:10px;background:#eceae5;overflow:hidden;display:flex;align-items:center;justify-content:center}.history-thumb img{width:100%;height:100%;object-fit:cover}
-#busy{position:fixed;inset:0;background:rgba(255,255,255,.65);z-index:99;display:none;align-items:center;justify-content:center;font-weight:800}#busy.show{display:flex}
-@media(max-width:650px){.app{padding:10px}.houses{grid-template-columns:1fr 1fr}.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.body{padding:7px}.body h3{font-size:12px}.item .meta{font-size:10px}.item button{font-size:10px;padding:6px 4px!important}.topbar{display:grid;grid-template-columns:auto 1fr auto;gap:6px}.topbar h2{font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.topbar .grow{display:none}.topbar #lastBtn,.topbar #deleteHouseBtn{font-size:0;padding:9px;width:38px}.topbar #lastBtn:after{content:'↩';font-size:18px}.topbar #deleteHouseBtn:after{content:'🗑';font-size:16px}.topbar #addBtn{font-size:0;width:38px;padding:9px}.topbar #addBtn:after{content:'＋';font-size:18px}.toolbar{display:grid;grid-template-columns:1fr auto auto;gap:6px}.toolbar .search{grid-column:1/-1;width:100%}.toolbar select{min-width:0;width:100%}.toolbar button{white-space:nowrap;padding:9px;font-size:12px}.modebar{display:grid;grid-template-columns:1fr 1fr;gap:6px}.modebar button{padding:9px;font-size:12px}.house{min-height:145px;padding:15px}.house .name{font-size:18px}.fields{grid-template-columns:1fr}.full{grid-column:auto}.transfer{flex-wrap:wrap}}
-@media(max-width:430px){.houses{grid-template-columns:1fr 1fr}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.house{min-height:125px}.house .name{font-size:15px}.category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.category-card{min-height:110px;padding:12px}}
-</style>
-</head>
-<body>
-<div id="busy">Caricamento…</div>
-<div class="app">
-<section class="view active" id="authView">
- <div class="card auth">
-  <h2>Il tuo Guardaroba</h2>
-  <div class="muted">Accedi per vedere le tue case e i tuoi vestiti.</div>
-  <input id="email" type="email" autocomplete="email" placeholder="Email">
-  <input id="password" type="password" autocomplete="current-password" placeholder="Password (minimo 6 caratteri)">
-  <div class="auth-actions"><button class="primary" id="loginBtn">Accedi</button><button class="ghost" id="signupBtn">Crea account</button></div>
-  <div id="authMsg" class="muted"></div>
- </div>
-</section>
-
-<section class="view" id="appView">
-<header>
- <div><h1>Guardaroba</h1><div class="sub"><span id="userLabel"></span> · versione 1.6</div></div>
- <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ghost" id="importBtn">Importa Excel</button><button class="ghost" id="logoutBtn">Esci</button></div>
-</header>
-<input id="excelFile" type="file" accept=".xlsx,.xls" hidden><input id="housePhotoFile" type="file" accept="image/*" hidden>
-<section class="view active" id="homeView"><div class="houses" id="houses"></div></section>
-
-<section class="view" id="houseView">
- <div class="topbar">
-  <button class="ghost" id="backBtn">← Case</button><h2 id="houseTitle"></h2><div class="grow"></div>
-  <button class="ghost" id="editHouseBtn">🏠</button><button class="ghost" id="lastBtn">Cosa hai portato l'ultima volta</button><button class="danger" id="deleteHouseBtn">Elimina casa</button><button class="primary" id="addBtn">+ Capo</button>
- </div>
- <div class="modebar">
-  <button class="ghost active" id="allModeBtn">Tutti i capi</button>
-  <button class="ghost" id="categoryModeBtn">Categorie</button>
- </div>
- <div class="category-grid" id="categoryGrid" style="display:none"></div>
- <div class="toolbar"><input class="search" id="search" placeholder="Cerca un capo..."><select id="catFilter"><option value="">Tutte le categorie</option></select><button class="ghost" id="selectAll">Seleziona tutto</button></div>
- <div class="grid" id="grid"></div>
- <div class="transfer" id="transferBar"><strong id="selCount"></strong><div class="grow"></div><span>Sposta in</span><select id="targetHouse"></select><button class="secondary" id="moveBtn">Sposta</button></div>
-</section>
-</section>
-</div>
-
-<dialog id="itemDialog">
-<form id="itemForm">
- <div class="formhead"><h2 id="itemTitle">Aggiungi capo</h2><button type="button" class="ghost" id="closeItem">✕</button></div>
- <input type="hidden" id="itemId">
- <div class="fields">
-  <div><label>Nome *</label><input id="name" required></div>
-  <div><label>Categoria</label><input id="category" placeholder="Es. Camicie"></div>
-  <div><label>Quantità *</label><input id="quantity" type="number" min="1" step="1" value="1" required></div>
-  <div><label>Casa *</label><select id="itemHouse" required></select></div>
-  <div><label>Colore</label><input id="color"></div>
-  <div><label>Stagione</label><select id="season"><option>Tutto l'anno</option><option>Estate</option><option>Inverno</option><option>Mezza stagione</option></select></div>
-  <div><label>Marca</label><input id="brand"></div>
-  <div class="full"><label>Descrizione</label><textarea id="description"></textarea></div>
-  <div class="full"><label>Foto (facoltativa)</label>
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <button type="button" class="ghost" id="cameraBtn">📷 Scatta foto</button>
-    <button type="button" class="ghost" id="libraryBtn">🖼️ Scegli dalla libreria</button>
-  </div>
-  <input id="photoCamera" type="file" accept="image/*" capture="environment" hidden>
-  <input id="photoLibrary" type="file" accept="image/*" hidden>
-  <img class="preview" id="preview">
-</div>
- </div>
- <div class="actions"><button type="button" class="danger" id="deleteBtn" style="display:none;margin-right:auto">Elimina</button><button type="button" class="ghost" id="cancelItem">Annulla</button><button class="primary">Salva</button></div>
-</form>
-</dialog>
-
-<dialog id="historyDialog">
-<div class="dialog-body">
- <div class="formhead"><h2>Cosa hai portato l'ultima volta</h2><button class="ghost" id="closeHistory">✕</button></div>
- <div id="history"></div>
- <div class="actions"><button class="ghost" id="closeHistory2">Chiudi</button><button class="primary" id="undoBtn">Riporta indietro</button></div>
-</div>
-</dialog>
-
+:root{--bg:#f6f5f1;--card:#fff;--text:#202124;--muted:#737373;--line:#e4e1da;--dark:#171717;--soft:#eceae4;--danger:#991b1b}*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text)}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{max-width:1120px;margin:auto;padding:12px}.view{display:none}.view.active{display:block}.card{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 6px 20px #0000000a}header,.topbar,.row,.toolbar,.modebar,.actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}header{justify-content:space-between;margin-bottom:13px}h1{font-size:30px;margin:0}h2{margin:0}.muted,.meta{color:var(--muted);font-size:11px}.grow{flex:1}.primary,.ghost,.soft,.danger{border:0;border-radius:10px;padding:9px 11px;font-weight:750}.primary{background:#171717;color:#fff}.ghost{background:#fff;border:1px solid var(--line)}.soft{background:var(--soft)}.danger{background:#fee2e2;color:var(--danger)}.auth{max-width:420px;margin:10vh auto;padding:22px}.auth input{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;margin:5px 0}
+.global{margin-bottom:12px}.global input{width:100%;padding:12px;border:1px solid var(--line);border-radius:13px}.results{display:grid;gap:6px;margin-top:6px}.hit{padding:9px;display:flex;text-align:left;align-items:center;gap:8px}
+.houses{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:9px}.house{padding:13px;min-height:120px;text-align:left;display:flex;flex-direction:column;justify-content:space-between}.ico{width:48px;height:48px;border-radius:12px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden}.ico img{width:100%;height:100%;object-fit:cover}.name{font-weight:850;margin-top:7px}.new{border-style:dashed;background:transparent;align-items:center;justify-content:center}
+.topbar{margin-bottom:9px}.modebar,.toolbar{margin-bottom:8px}.modebar .active{background:#171717;color:#fff}.toolbar input,.toolbar select{padding:8px;border:1px solid var(--line);border-radius:9px;background:#fff}.toolbar input{flex:1;min-width:160px}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px}.cat{padding:12px;text-align:left;min-height:100px}.folder{font-size:29px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:7px}.item{overflow:hidden;position:relative}.thumb{aspect-ratio:1/1;background:#eae8e2;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:10px;color:#999}.thumb img{width:100%;height:100%;object-fit:cover}.body{padding:7px}.body h3{font-size:12px;margin:0 0 3px}.ia{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:5px}.ia button{font-size:10px;padding:5px 2px}.check{position:absolute;top:5px;left:5px;width:19px;height:19px;z-index:2;accent-color:#111}
+.transfer{display:none;position:sticky;bottom:7px;background:#171717;color:#fff;border-radius:13px;padding:8px;gap:6px;align-items:center;margin-top:8px;z-index:5}.transfer.show{display:flex}.transfer select{padding:7px;border:0;border-radius:8px}.more{display:block;margin:10px auto}.empty{text-align:center;padding:30px;color:var(--muted);grid-column:1/-1}
+dialog{border:0;border-radius:17px;padding:0;width:min(550px,calc(100% - 18px));box-shadow:0 30px 80px #0005}dialog::backdrop{background:#0006}.dialog{padding:17px}.formhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}.full{grid-column:1/-1}label{display:block;font-size:11px;font-weight:800;margin-bottom:3px}.fields input,.fields select,.fields textarea{width:100%;padding:8px;border:1px solid var(--line);border-radius:9px}.photoactions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.preview{display:none;width:100%;max-height:200px;object-fit:cover;border-radius:10px;margin-top:6px}.actions{justify-content:flex-end;margin-top:11px}
+.baglist{display:grid;gap:7px}.bagrow{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:9px}.bagrow input[type=number]{width:55px;padding:5px;border:1px solid var(--line);border-radius:7px}.bagbar{position:sticky;bottom:7px;background:#171717;color:#fff;border-radius:13px;padding:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}.bagbar select{padding:7px;border:0;border-radius:8px}#busy{position:fixed;inset:0;background:#ffffffb8;z-index:99;display:none;align-items:center;justify-content:center;font-weight:850}#busy.show{display:flex}
+@media(max-width:600px){.app{padding:8px}.houses{grid-template-columns:repeat(2,1fr);gap:6px}.house{min-height:105px;padding:9px}.grid{grid-template-columns:repeat(3,1fr);gap:5px}.body h3{font-size:10px}.meta{font-size:9px}.topbar h2{font-size:17px}.toolbar{display:grid;grid-template-columns:1fr auto}.toolbar input{grid-column:1/-1;width:100%}.modebar{display:grid;grid-template-columns:1fr 1fr}.cats{grid-template-columns:repeat(2,1fr)}.fields{grid-template-columns:1fr}.full{grid-column:auto}}
+</style></head><body><div id="busy">Caricamento…</div><div class="app">
+<section id="auth" class="view active"><div class="card auth"><h2>Guardaroba</h2><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password"><div class="row"><button id="login" class="primary">Accedi</button><button id="signup" class="ghost">Crea account</button></div><div id="authmsg" class="muted"></div></div></section>
+<section id="app" class="view"><header><div><h1>Guardaroba</h1><div class="muted"><span id="user"></span> · versione 2.0</div></div><div class="row"><button id="bagBtn" class="soft">🧳 Valigia</button><button id="excelBtn" class="ghost">Excel</button><button id="logout" class="ghost">Esci</button></div></header><input id="excel" type="file" accept=".xlsx,.xls" hidden>
+<section id="home" class="view active"><div class="global"><input id="gsearch" placeholder="🔎 Cerca in tutte le case…"><div id="gres" class="results"></div><button id="gmore" class="ghost more" style="display:none">Altri risultati</button></div><div id="houses" class="houses"></div></section>
+<section id="house" class="view"><div class="topbar"><button id="back" class="ghost">←</button><h2 id="htitle"></h2><div class="grow"></div><button id="historyBtn" class="ghost">↩</button><button id="add" class="primary">＋</button></div><div class="modebar"><button id="all" class="ghost active">Tutti i capi</button><button id="categories" class="ghost">Categorie</button></div><div id="catgrid" class="cats" style="display:none"></div><div id="controls"><div class="toolbar"><input id="search" placeholder="Cerca in questa casa…"><select id="catfilter"><option value="">Tutte le categorie</option></select><button id="selectall" class="ghost">✓ Tutti</button></div><div id="items" class="grid"></div><button id="more" class="ghost more" style="display:none">Carica altri</button></div><div id="transfer" class="transfer"><b id="selcount"></b><div class="grow"></div><select id="dest"></select><button id="move" class="soft">Sposta</button></div></section>
+<section id="bag" class="view"><div class="topbar"><button id="bagback" class="ghost">←</button><h2>🧳 Valigia</h2><div class="grow"></div><button id="clearbag" class="danger">Svuota</button></div><div class="muted" style="margin-bottom:8px">Lista virtuale: non modifica la posizione fisica dei capi.</div><div id="baglist" class="baglist"></div><button id="bagmore" class="ghost more" style="display:none">Carica altri</button><div class="bagbar"><b id="bagsel">0 selezionati</b><div class="grow"></div><select id="bagdest"></select><button id="bagmove" class="soft">Sposta selezionati</button></div></section></section></div>
+<dialog id="itemdlg"><form id="itemform" class="dialog"><div class="formhead"><h2 id="itemtitle">Capo</h2><button type="button" id="closeitem" class="ghost">✕</button></div><input id="itemid" type="hidden"><div class="fields"><div><label>Nome *</label><input id="name" required></div><div><label>Marca</label><input id="brand"></div><div><label>Categoria</label><input id="category"></div><div><label>Quantità *</label><input id="quantity" type="number" min="1" value="1" required></div><div><label>Casa *</label><select id="itemhouse"></select></div><div><label>Colore</label><input id="color"></div><div><label>Stagione</label><select id="season"><option>Tutto l'anno</option><option>Estate</option><option>Inverno</option><option>Mezza stagione</option></select></div><div class="full"><label>Descrizione</label><textarea id="description"></textarea></div><div class="full"><label>Foto</label><div class="photoactions"><button type="button" id="camera" class="ghost">📷 Scatta</button><button type="button" id="library" class="ghost">🖼️ Libreria</button></div><input id="pcamera" type="file" accept="image/*" capture="environment" hidden><input id="plibrary" type="file" accept="image/*" hidden><img id="preview" class="preview"></div></div><div class="actions"><button type="button" id="deleteitem" class="danger" style="display:none;margin-right:auto">Elimina</button><button type="button" id="cancelitem" class="ghost">Annulla</button><button class="primary">Salva</button></div></form></dialog>
+<dialog id="histdlg"><div class="dialog"><div class="formhead"><h2>Ultimo trasferimento</h2><button id="closehist" class="ghost">✕</button></div><div id="hist"></div><div class="actions"><button id="undo" class="primary">Riporta indietro</button></div></div></dialog>
 <script>
-const SUPABASE_URL="https://atupzrgrgojvztbcrlua.supabase.co", SUPABASE_KEY="sb_publishable_5slDv8ZTohQD_16E2r7pdw_m6jijofi";
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-const $=s=>document.querySelector(s);
-let user=null,houses=[],items=[],currentHouse=null,selected=new Set(),editPhotoPath=null,lastTransfer=null,houseMode='all',openCategory=null;
-const busy=v=>$('#busy').classList.toggle('show',v);
-const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-function show(id){['authView','appView'].forEach(x=>$('#'+x).classList.toggle('active',x===id))}
-function subview(id){['homeView','houseView'].forEach(x=>$('#'+x).classList.toggle('active',x===id))}
-function msg(t){$('#authMsg').textContent=t||''}
-async function init(){
- const {data:{session}}=await sb.auth.getSession();
- if(session) await enter(session.user); else show('authView');
- sb.auth.onAuthStateChange(async(_,session)=>{if(session?.user&&!user)await enter(session.user);if(!session){user=null;show('authView')}});
-}
-async function enter(u){
- user=u;$('#userLabel').textContent=u.email||'';show('appView');subview('homeView');await loadAll();
-}
-async function loadAll(){
- busy(true);
- const [h,i]=await Promise.all([
-   sb.from('case').select('*').eq('user_id',user.id).order('created_at'),
-   sb.from('vestiti').select('*').eq('user_id',user.id).order('created_at',{ascending:false})
- ]);
- busy(false);
- if(h.error||i.error){alert((h.error||i.error).message);return}
- houses=h.data||[];items=i.data||[];renderHome();
-}
-function renderHome(){
- subview('homeView'); currentHouse=null; selected.clear(); houseMode='all'; openCategory=null;
- $('#houses').innerHTML=houses.map(h=>{const n=items.filter(i=>i.casa_id===h.id).length;return `<button class="card house" data-house="${h.id}"><div><div class="ico" id="houseico-${h.id}">${h.foto_path?'…':esc(h.icona||'🏠')}</div><div class="name">${esc(h.nome)}</div></div><div class="muted">${n} ${n===1?'capo':'capi'}</div></button>`}).join('')+
- `<button class="card house new" id="newHouse"><div class="ico">＋</div><b>Aggiungi casa</b></button>`;
- document.querySelectorAll('[data-house]').forEach(b=>b.onclick=()=>openHouse(b.dataset.house)); $('#newHouse').onclick=addHouse;
- for(const h of houses.filter(x=>x.foto_path)) signedUrl(h.foto_path).then(u=>{const e=$('#houseico-'+h.id);if(e&&u)e.innerHTML=`<img src="${u}" alt="">`});
-}
-async function addHouse(){
- const nome=prompt('Nome della nuova casa:'); if(!nome?.trim())return;
- const icona=(prompt('Scegli una emoji per la casa (es. 🏠 🏖️ 🏔️ 🏙️):','🏠')||'🏠').trim()||'🏠';
- busy(true);const {data,error}=await sb.from('case').insert({nome:nome.trim(),icona,user_id:user.id}).select().single();busy(false);
- if(error){alert(error.message);return} houses.push(data);renderHome();
-}
-function openHouse(id){currentHouse=id;selected.clear();houseMode='all';openCategory=null;$('#search').value='';subview('houseView');renderHouse()}
-function categoryIcon(name){
- const n=(name||'').toLowerCase();
- if(n.includes('magli')||n.includes('t-shirt')||n.includes('shirt'))return '👕';
- if(n.includes('camic'))return '👔';
- if(n.includes('pantal')||n.includes('jeans'))return '👖';
- if(n.includes('scarpe')||n.includes('sneaker'))return '👟';
- if(n.includes('stival'))return '🥾';
- if(n.includes('vestit')||n.includes('abito'))return '👗';
- if(n.includes('cappott')||n.includes('giacc'))return '🧥';
- if(n.includes('costume'))return '🩱';
- if(n.includes('intim')||n.includes('mutand'))return '🩲';
- if(n.includes('calz'))return '🧦';
- if(n.includes('cappell'))return '🧢';
- if(n.includes('bors'))return '👜';
- if(n.includes('accessor'))return '🕶️';
- return '📁';
-}
-async function signedUrl(path){if(!path)return null;const {data}=await sb.storage.from('foto-vestiti').createSignedUrl(path,3600);return data?.signedUrl||null}
-async function renderHouse(){
- const h=houses.find(x=>x.id===currentHouse);if(!h)return renderHome();$('#houseTitle').textContent=openCategory?`${h.nome} · ${openCategory}`:h.nome;
- $('#allModeBtn').classList.toggle('active',houseMode==='all');
- $('#categoryModeBtn').classList.toggle('active',houseMode==='categories');
-
- const cats=[...new Set(items.filter(i=>i.casa_id===currentHouse).map(i=>i.categoria).filter(Boolean))].sort();let cv=$('#catFilter').value;
- $('#catFilter').innerHTML='<option value="">Tutte le categorie</option>'+cats.map(c=>`<option>${esc(c)}</option>`).join('');if(cats.includes(cv))$('#catFilter').value=cv;
- const categoryGrid=$('#categoryGrid');
- if(houseMode==='categories'){
-   const counts={};
-   items.filter(i=>i.casa_id===currentHouse).forEach(i=>{const c=(i.categoria||'Senza categoria').trim()||'Senza categoria';counts[c]=(counts[c]||0)+(i.quantita||1)});
-   categoryGrid.style.display='grid';
-   categoryGrid.innerHTML=Object.entries(counts).sort((a,b)=>a[0].localeCompare(b[0],'it')).map(([c,n])=>`<button class="card category-card" data-catfolder="${esc(c)}"><div><div class="folder">${categoryIcon(c)}</div><div class="catname">${esc(c)}</div></div><div class="muted">${n} ${n===1?'pezzo':'pezzi'}</div></button>`).join('') || `<div class="empty"><div class="emoji">📁</div><b>Nessuna categoria</b></div>`;
-   categoryGrid.querySelectorAll('[data-catfolder]').forEach(b=>b.onclick=()=>{openCategory=b.dataset.catfolder;houseMode='all';$('#catFilter').value=openCategory==='Senza categoria'?'':openCategory;renderHouse()});
- }else{
-   categoryGrid.style.display='none';
- }
- const q=$('#search').value.toLowerCase().trim();
- let cat=$('#catFilter').value;
- if(openCategory){
-   cat=openCategory==='Senza categoria'?'__NONE__':openCategory;
- }
- const vis=items.filter(i=>i.casa_id===currentHouse&&(!q||[i.nome,i.categoria,i.colore,i.marca,i.descrizione].join(' ').toLowerCase().includes(q))&&(!cat||(cat==='__NONE__'?!(i.categoria||'').trim():i.categoria===cat)));
- $('#grid').innerHTML=vis.length?vis.map(i=>`<article class="card item"><input class="check" type="checkbox" data-sel="${i.id}" ${selected.has(i.id)?'checked':''}><div class="thumb" id="ph-${i.id}">${i.foto_path?'Caricamento foto…':'Nessuna foto'}</div><div class="body"><h3>${esc(i.nome)}${(i.quantita||1)>1?' × '+(i.quantita||1):''}</h3><div class="meta">${esc(i.categoria||'Senza categoria')}${i.colore?' · '+esc(i.colore):''}${i.stagione?' · '+esc(i.stagione):''}</div><div style="display:flex;gap:7px;margin-top:9px"><button class="ghost" style="flex:1;padding:8px" data-edit="${i.id}">Modifica</button><button class="ghost" style="flex:1;padding:8px" data-dup="${i.id}">Duplica</button></div></div></article>`).join(''):`<div class="empty"><div class="emoji">👕</div><b>Nessun capo in questa casa</b><br>Aggiungine uno.</div>`;
- $('#grid').style.display=houseMode==='categories'?'none':'grid';
- $('#search').parentElement.style.display=houseMode==='categories'?'none':'flex';
- document.querySelectorAll('[data-sel]').forEach(c=>c.onchange=()=>{c.checked?selected.add(c.dataset.sel):selected.delete(c.dataset.sel);renderTransfer()});
- document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openItem(b.dataset.edit));
- document.querySelectorAll('[data-dup]').forEach(b=>b.onclick=()=>duplicateItem(b.dataset.dup));
- renderTargets();renderTransfer();
- for(const i of vis.filter(x=>x.foto_path)){signedUrl(i.foto_path).then(url=>{const p=$('#ph-'+i.id);if(p&&url)p.innerHTML=`<img src="${url}" alt="">`})}
-}
-async function duplicateItem(id){
- const original=items.find(i=>i.id===id);if(!original)return;
- busy(true);
- try{
-  let newPhotoPath=null;
-  if(original.foto_path){
-    const signed=await signedUrl(original.foto_path);
-    if(signed){
-      const blob=await fetch(signed).then(r=>r.blob());
-      const ext=(original.foto_path.split('.').pop()||'jpg').replace(/[^a-zA-Z0-9]/g,'')||'jpg';
-      newPhotoPath=`${user.id}/${crypto.randomUUID()}.${ext}`;
-      const up=await sb.storage.from('foto-vestiti').upload(newPhotoPath,blob,{contentType:blob.type||undefined});
-      if(up.error)throw up.error;
-    }
-  }
-  const payload={
-    user_id:user.id,casa_id:original.casa_id,nome:original.nome,categoria:original.categoria,
-    quantita:original.quantita||1,colore:original.colore,stagione:original.stagione,
-    marca:original.marca,descrizione:original.descrizione,foto_path:newPhotoPath
-  };
-  const res=await sb.from('vestiti').insert(payload).select().single();
-  if(res.error)throw res.error;
-  items.unshift(res.data);
-  renderHouse();
- }catch(err){alert(err.message||err)}
- finally{busy(false)}
-}
-
-function renderTargets(){const other=houses.filter(h=>h.id!==currentHouse);$('#targetHouse').innerHTML=other.map(h=>`<option value="${h.id}">${esc(h.nome)}</option>`).join('');$('#moveBtn').disabled=!other.length}
-function renderTransfer(){$('#selCount').textContent=selected.size+' selezionat'+(selected.size===1?'o':'i');$('#transferBar').classList.toggle('show',selected.size>0)}
-function fillHouseSelect(){$('#itemHouse').innerHTML=houses.map(h=>`<option value="${h.id}">${esc(h.nome)}</option>`).join('')}
-async function openItem(id){
- const i=items.find(x=>x.id===id);fillHouseSelect();$('#itemId').value=i?.id||'';$('#itemTitle').textContent=i?'Modifica capo':'Aggiungi capo';
- $('#name').value=i?.nome||'';$('#category').value=i?.categoria||'';$('#quantity').value=i?.quantita||1;$('#color').value=i?.colore||'';$('#season').value=i?.stagione||"Tutto l'anno";$('#brand').value=i?.marca||'';$('#description').value=i?.descrizione||'';$('#itemHouse').value=i?.casa_id||currentHouse||houses[0]?.id||'';$('#photoCamera').value='';$('#photoLibrary').value='';editPhotoPath=i?.foto_path||null;
- $('#preview').style.display='none';if(editPhotoPath){const u=await signedUrl(editPhotoPath);if(u){$('#preview').src=u;$('#preview').style.display='block'}}
- $('#deleteBtn').style.display=i?'block':'none';$('#itemDialog').showModal();
-}
-async function uploadPhoto(file){
- if(!file)return editPhotoPath;
- const ext=(file.name.split('.').pop()||'jpg').replace(/[^a-zA-Z0-9]/g,'').toLowerCase()||'jpg';
- const path=`${user.id}/${crypto.randomUUID()}.${ext}`;
- const {error}=await sb.storage.from('foto-vestiti').upload(path,file,{upsert:false,contentType:file.type||undefined});
- if(error)throw error;return path;
-}
-$('#itemForm').onsubmit=async e=>{
- e.preventDefault();if(!houses.length){alert('Crea prima una casa.');return}
- busy(true);
- try{
-  const old=items.find(x=>x.id===$('#itemId').value);const chosenFile=$('#photoCamera').files[0]||$('#photoLibrary').files[0];const newPath=await uploadPhoto(chosenFile);
-  const payload={user_id:user.id,casa_id:$('#itemHouse').value,nome:$('#name').value.trim(),categoria:$('#category').value.trim()||null,quantita:Math.max(1,parseInt($('#quantity').value)||1),colore:$('#color').value.trim()||null,stagione:$('#season').value,marca:$('#brand').value.trim()||null,descrizione:$('#description').value.trim()||null,foto_path:newPath,updated_at:new Date().toISOString()};
-  let res;
-  if(old)res=await sb.from('vestiti').update(payload).eq('id',old.id).eq('user_id',user.id).select().single();
-  else res=await sb.from('vestiti').insert(payload).select().single();
-  if(res.error)throw res.error;
-  if(old&&old.foto_path&&newPath!==old.foto_path)await sb.storage.from('foto-vestiti').remove([old.foto_path]);
-  if(old)items[items.findIndex(x=>x.id===old.id)]=res.data;else items.unshift(res.data);
-  $('#itemDialog').close();renderHouse();
- }catch(err){alert(err.message||err)}finally{busy(false)}
-};
-function previewChosenFile(input){
- const f=input.files[0];
- if(f){$('#preview').src=URL.createObjectURL(f);$('#preview').style.display='block'}
-}
-$('#cameraBtn').onclick=()=>$('#photoCamera').click();
-$('#libraryBtn').onclick=()=>$('#photoLibrary').click();
-$('#photoCamera').onchange=e=>{ if(e.target.files[0]) $('#photoLibrary').value=''; previewChosenFile(e.target) };
-$('#photoLibrary').onchange=e=>{ if(e.target.files[0]) $('#photoCamera').value=''; previewChosenFile(e.target) };
-$('#deleteBtn').onclick=async()=>{
- const id=$('#itemId').value,i=items.find(x=>x.id===id);if(!i||!confirm('Eliminare questo capo?'))return;busy(true);
- const {error}=await sb.from('vestiti').delete().eq('id',id).eq('user_id',user.id);if(!error&&i.foto_path)await sb.storage.from('foto-vestiti').remove([i.foto_path]);busy(false);
- if(error)return alert(error.message);items=items.filter(x=>x.id!==id);selected.delete(id);$('#itemDialog').close();renderHouse();
-};
-$('#moveBtn').onclick=async()=>{
- const target=$('#targetHouse').value,ids=[...selected];if(!target||!ids.length)return;busy(true);
- const {error}=await sb.from('vestiti').update({casa_id:target,updated_at:new Date().toISOString()}).in('id',ids).eq('user_id',user.id);
- if(error){busy(false);return alert(error.message)}
- const tr=await sb.from('trasferimenti').insert({user_id:user.id,da_casa_id:currentHouse,a_casa_id:target,vestito_ids:ids}).select().single();
- if(tr.error){busy(false);return alert('Capi spostati, ma non è stato possibile salvare lo storico: '+tr.error.message)}
- items.forEach(i=>{if(ids.includes(i.id))i.casa_id=target});selected.clear();busy(false);renderHouse();
-};
-async function editCurrentHouse(){
- const h=houses.find(x=>x.id===currentHouse);if(!h)return;
- const choice=prompt(`Icona di "${h.nome}":\n1 = cambia emoji\n2 = scegli una foto\n3 = cambia nome`,'1');
- if(choice==='1'){
-   const icona=(prompt('Inserisci una emoji:',h.icona||'🏠')||'').trim();if(!icona)return;
-   busy(true);const r=await sb.from('case').update({icona}).eq('id',h.id).eq('user_id',user.id).select().single();busy(false);
-   if(r.error)return alert(r.error.message);Object.assign(h,r.data);renderHouse();
- }else if(choice==='2'){
-   $('#housePhotoFile').value='';$('#housePhotoFile').click();
- }else if(choice==='3'){
-   const nome=(prompt('Nuovo nome:',h.nome)||'').trim();if(!nome)return;
-   busy(true);const r=await sb.from('case').update({nome}).eq('id',h.id).eq('user_id',user.id).select().single();busy(false);
-   if(r.error)return alert(r.error.message);Object.assign(h,r.data);renderHouse();
- }
-}
-$('#housePhotoFile').onchange=async e=>{
- const f=e.target.files[0],h=houses.find(x=>x.id===currentHouse);if(!f||!h)return;
- busy(true);
- try{
-   const ext=(f.name.split('.').pop()||'jpg').replace(/[^a-zA-Z0-9]/g,'').toLowerCase()||'jpg';
-   const path=`${user.id}/case-${h.id}-${crypto.randomUUID()}.${ext}`;
-   const up=await sb.storage.from('foto-vestiti').upload(path,f,{contentType:f.type||undefined});if(up.error)throw up.error;
-   const r=await sb.from('case').update({foto_path:path}).eq('id',h.id).eq('user_id',user.id).select().single();if(r.error)throw r.error;
-   if(h.foto_path)await sb.storage.from('foto-vestiti').remove([h.foto_path]);
-   Object.assign(h,r.data);renderHouse();
- }catch(err){alert(err.message||err)}finally{busy(false)}
-};
-
-async function deleteCurrentHouse(){
- const h=houses.find(x=>x.id===currentHouse);if(!h)return;
- const count=items.filter(i=>i.casa_id===currentHouse).length;
- if(count>0){
-   alert(`Non puoi eliminare "${h.nome}" perché contiene ancora ${count} ${count===1?'capo':'capi'}. Sposta o elimina prima i vestiti.`);
-   return;
- }
- if(!confirm(`Eliminare definitivamente la casa "${h.nome}"?`))return;
- busy(true);
- try{
-   const tr=await sb.from('trasferimenti').delete().eq('user_id',user.id).or(`da_casa_id.eq.${currentHouse},a_casa_id.eq.${currentHouse}`);
-   if(tr.error)throw tr.error;
-   const {error}=await sb.from('case').delete().eq('id',currentHouse).eq('user_id',user.id);
-   if(error)throw error;
-   houses=houses.filter(x=>x.id!==currentHouse);
-   currentHouse=null;
-   renderHome();
- }catch(err){alert(err.message||err)}
- finally{busy(false)}
-}
-
-async function showLast(){
- busy(true);const {data,error}=await sb.from('trasferimenti').select('*').eq('user_id',user.id).eq('a_casa_id',currentHouse).order('created_at',{ascending:false}).limit(1).maybeSingle();busy(false);
- if(error)return alert(error.message);lastTransfer=data;
- if(!data){$('#history').innerHTML='<div class="empty"><div class="emoji">🧳</div><b>Nessun trasferimento verso questa casa</b></div>';$('#undoBtn').style.display='none';$('#historyDialog').showModal();return}
- const from=houses.find(h=>h.id===data.da_casa_id)?.nome||'Casa precedente',to=houses.find(h=>h.id===data.a_casa_id)?.nome||'Casa';
- const moved=data.vestito_ids.map(id=>items.find(i=>i.id===id)).filter(Boolean);
- $('#history').innerHTML=`<div class="card" style="padding:14px;background:var(--soft)"><div class="muted">${new Date(data.created_at).toLocaleString('it-IT')}</div><b>${esc(from)} → ${esc(to)}</b></div>`+moved.map(i=>`<div class="history-item"><div class="history-thumb" id="hist-${i.id}">${i.foto_path?'…':'👕'}</div><div><b>${esc(i.nome)}${(i.quantita||1)>1?' × '+(i.quantita||1):''}</b><div class="meta">${esc(i.categoria||'')}</div></div></div>`).join('');
- $('#undoBtn').style.display=moved.some(i=>i.casa_id===data.a_casa_id)?'inline-block':'none';$('#historyDialog').showModal();
- for(const i of moved.filter(x=>x.foto_path))signedUrl(i.foto_path).then(u=>{const e=$('#hist-'+i.id);if(e&&u)e.innerHTML=`<img src="${u}">`});
-}
-$('#undoBtn').onclick=async()=>{
- if(!lastTransfer)return;const ids=lastTransfer.vestito_ids.filter(id=>items.find(i=>i.id===id)?.casa_id===lastTransfer.a_casa_id);if(!ids.length)return;
- busy(true);const up=await sb.from('vestiti').update({casa_id:lastTransfer.da_casa_id,updated_at:new Date().toISOString()}).in('id',ids).eq('user_id',user.id);
- if(up.error){busy(false);return alert(up.error.message)}const del=await sb.from('trasferimenti').delete().eq('id',lastTransfer.id).eq('user_id',user.id);busy(false);if(del.error)return alert(del.error.message);
- items.forEach(i=>{if(ids.includes(i.id))i.casa_id=lastTransfer.da_casa_id});$('#historyDialog').close();renderHouse();
-};
-$('#loginBtn').onclick=async()=>{msg('Accesso…');const {error}=await sb.auth.signInWithPassword({email:$('#email').value.trim(),password:$('#password').value});msg(error?error.message:'')}
-$('#signupBtn').onclick=async()=>{msg('Creazione account…');const {data,error}=await sb.auth.signUp({email:$('#email').value.trim(),password:$('#password').value});msg(error?error.message:(data.session?'Account creato.':'Account creato: controlla la tua email per confermare.'))}
-$('#logoutBtn').onclick=()=>sb.auth.signOut();$('#backBtn').onclick=renderHome;$('#addBtn').onclick=()=>openItem();$('#closeItem').onclick=$('#cancelItem').onclick=()=>$('#itemDialog').close();$('#lastBtn').onclick=showLast;$('#editHouseBtn').onclick=editCurrentHouse;$('#deleteHouseBtn').onclick=deleteCurrentHouse;$('#closeHistory').onclick=$('#closeHistory2').onclick=()=>$('#historyDialog').close();
-$('#allModeBtn').onclick=()=>{houseMode='all';openCategory=null;$('#catFilter').value='';renderHouse()};
-$('#categoryModeBtn').onclick=()=>{houseMode='categories';openCategory=null;selected.clear();renderHouse()};
-$('#search').oninput=renderHouse;$('#catFilter').onchange=()=>{openCategory=null;renderHouse()};$('#selectAll').onclick=()=>{const ids=[...document.querySelectorAll('[data-sel]')].map(x=>x.dataset.sel),all=ids.length&&ids.every(id=>selected.has(id));ids.forEach(id=>all?selected.delete(id):selected.add(id));renderHouse()};
-
-$('#importBtn').onclick=()=>$('#excelFile').click();
-$('#excelFile').onchange=async e=>{
- const f=e.target.files[0];if(!f)return;if(typeof XLSX==='undefined')return alert('Lettore Excel non disponibile.');
- busy(true);
- try{
-  const wb=XLSX.read(await f.arrayBuffer(),{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});let count=0;
-  for(const raw of rows){
-   const n={};Object.keys(raw).forEach(k=>n[k.trim().toLowerCase()]=raw[k]);
-   const hn=String(n['casa']||'').trim(),nome=String(n['nome capo']||n['nome']||'').trim();if(!hn||!nome)continue;
-   let h=houses.find(x=>x.nome.toLowerCase()===hn.toLowerCase());
-   if(!h){const r=await sb.from('case').insert({user_id:user.id,nome:hn}).select().single();if(r.error)throw r.error;h=r.data;houses.push(h)}
-   const r=await sb.from('vestiti').insert({user_id:user.id,casa_id:h.id,nome,categoria:String(n['categoria']||'').trim()||null,colore:String(n['colore']||'').trim()||null,stagione:String(n['stagione']||"Tutto l'anno").trim()||"Tutto l'anno",quantita:Math.max(1,parseInt(n['quantità']||n['quantita']||1)||1),marca:String(n['marca']||'').trim()||null,descrizione:String(n['descrizione']||n['note']||'').trim()||null}).select().single();
-   if(r.error)throw r.error;items.unshift(r.data);count++;
-  }
-  renderHome();alert(count+' capi importati.');
- }catch(err){alert(err.message||err)}finally{busy(false);e.target.value=''}
-};
-if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-init();
-</script>
-</body></html>
+const sb=supabase.createClient("https://atupzrgrgojvztbcrlua.supabase.co","sb_publishable_5slDv8ZTohQD_16E2r7pdw_m6jijofi"),$=s=>document.querySelector(s),PAGE=60;let user=null,houses=[],hid=null,items=[],offset=0,hasmore=false,mode='all',opencat=null,selected=new Set(),photoPath=null,gtimer=null,goffset=0,bag=[],boffset=0,bsel=new Set(),lastBatch=null;
+const busy=v=>$('#busy').classList.toggle('show',v),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));function main(id){['auth','app'].forEach(x=>$('#'+x).classList.toggle('active',x===id))}function page(id){['home','house','bag'].forEach(x=>$('#'+x).classList.toggle('active',x===id))}
+function icon(n){n=(n||'').toLowerCase();if(n.includes('magli')||n.includes('t-shirt'))return'👕';if(n.includes('camic'))return'👔';if(n.includes('pantal')||n.includes('jeans'))return'👖';if(n.includes('scar'))return'👟';if(n.includes('vestit')||n.includes('abito'))return'👗';if(n.includes('giacc')||n.includes('cappott'))return'🧥';if(n.includes('calz'))return'🧦';if(n.includes('bors'))return'👜';return'📁'}
+async function surl(p){if(!p)return null;const{data}=await sb.storage.from('foto-vestiti').createSignedUrl(p,3600);return data?.signedUrl}
+async function init(){const{data:{session}}=await sb.auth.getSession();if(session)await enter(session.user);else main('auth');sb.auth.onAuthStateChange(async(_,s)=>{if(s?.user&&!user)await enter(s.user);if(!s){user=null;main('auth')}})}async function enter(u){user=u;$('#user').textContent=u.email||'';main('app');await loadHouses();home()}async function loadHouses(){const{data,error}=await sb.rpc('lista_case_con_conteggi');if(error)throw error;houses=data||[]}
+function home(){page('home');hid=null;selected.clear();$('#houses').innerHTML=houses.map(h=>`<button class="card house" data-h="${h.id}"><div><div class="ico" id="hi-${h.id}">${h.foto_path?'…':esc(h.icona||'🏠')}</div><div class="name">${esc(h.nome)}</div></div><div class="muted">${h.totale||0} pezzi</div></button>`).join('')+`<button id="newhouse" class="card house new"><b>＋ Aggiungi casa</b></button>`;document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>openHouse(b.dataset.h));$('#newhouse').onclick=addHouse;houses.filter(h=>h.foto_path).forEach(h=>surl(h.foto_path).then(u=>{const e=$('#hi-'+h.id);if(e&&u)e.innerHTML=`<img src="${u}">`}))}
+async function addHouse(){const nome=(prompt('Nome casa:')||'').trim();if(!nome)return;const icona=(prompt('Emoji casa:','🏠')||'🏠').trim();const{error}=await sb.from('case').insert({user_id:user.id,nome,icona});if(error)return alert(error.message);await loadHouses();home()}
+async function cats(){const{data,error}=await sb.rpc('categorie_casa',{p_casa:hid});if(error)throw error;$('#catfilter').innerHTML='<option value="">Tutte le categorie</option>'+(data||[]).map(x=>`<option value="${esc(x.categoria)}">${esc(x.categoria)}</option>`).join('');$('#catgrid').innerHTML=(data||[]).map(x=>`<button class="card cat" data-c="${esc(x.categoria)}"><div class="folder">${icon(x.categoria)}</div><b>${esc(x.categoria)}</b><div class="muted">${x.totale} pezzi</div></button>`).join('');document.querySelectorAll('[data-c]').forEach(b=>b.onclick=async()=>{opencat=b.dataset.c;mode='all';$('#catfilter').value=opencat;await loadItems(true);renderHouse()})}
+async function loadItems(reset=false){if(reset){offset=0;items=[]}const{data,error}=await sb.rpc('lista_vestiti_casa',{p_casa:hid,p_categoria:opencat||$('#catfilter').value||null,p_query:$('#search').value.trim()||null,p_limit:PAGE,p_offset:offset});if(error)throw error;items=reset?(data||[]):items.concat(data||[]);offset=items.length;hasmore=(data||[]).length===PAGE}
+async function openHouse(id){hid=id;mode='all';opencat=null;selected.clear();$('#search').value='';page('house');await Promise.all([cats(),loadItems(true)]);renderHouse()}
+function renderHouse(){const h=houses.find(x=>x.id===hid);$('#htitle').textContent=opencat?`${h.nome} · ${opencat}`:h.nome;$('#all').classList.toggle('active',mode==='all');$('#categories').classList.toggle('active',mode==='categories');$('#catgrid').style.display=mode==='categories'?'grid':'none';$('#controls').style.display=mode==='categories'?'none':'block';if(mode==='categories')return;$('#items').innerHTML=items.length?items.map(i=>`<article class="card item"><input class="check" type="checkbox" data-s="${i.id}" ${selected.has(i.id)?'checked':''}><div class="thumb" id="p-${i.id}">${i.foto_path?'…':'👕'}</div><div class="body"><h3>${esc(i.nome)}${i.quantita>1?' × '+i.quantita:''}</h3><div class="meta">${esc(i.marca||'Senza marca')}</div><div class="ia"><button class="ghost" data-e="${i.id}">Modifica</button><button class="ghost" data-b="${i.id}">🧳</button></div></div></article>`).join(''):`<div class="empty">Nessun capo</div>`;document.querySelectorAll('[data-s]').forEach(c=>c.onchange=()=>{c.checked?selected.add(c.dataset.s):selected.delete(c.dataset.s);renderTransfer()});document.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>openItem(b.dataset.e));document.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>addBag(b.dataset.b));$('#more').style.display=hasmore?'block':'none';$('#dest').innerHTML=houses.filter(h=>h.id!==hid).map(h=>`<option value="${h.id}">${esc(h.nome)}</option>`).join('');renderTransfer();items.filter(i=>i.foto_path).forEach(i=>surl(i.foto_path).then(u=>{const e=$('#p-'+i.id);if(e&&u)e.innerHTML=`<img src="${u}">`}))}
+function renderTransfer(){$('#selcount').textContent=selected.size+' selezionati';$('#transfer').classList.toggle('show',selected.size>0)}async function move(){const m=[];for(const id of selected){const i=items.find(x=>x.id===id);let q=i.quantita;if(q>1){const a=prompt(`Quanti "${i.nome}" spostare? Disponibili: ${i.quantita}`,q);if(a===null)return;q=parseInt(a)}if(!Number.isInteger(q)||q<1||q>i.quantita)return alert('Quantità non valida');m.push({vestito_id:id,quantita:q})}if(!m.length)return;busy(true);const{error}=await sb.rpc('sposta_capi',{p_movimenti:m,p_destinazione:$('#dest').value});busy(false);if(error)return alert(error.message);selected.clear();await Promise.all([loadHouses(),cats(),loadItems(true)]);renderHouse()}
+function houseSelect(){$('#itemhouse').innerHTML=houses.map(h=>`<option value="${h.id}">${esc(h.nome)}</option>`).join('')}async function openItem(id){const i=items.find(x=>x.id===id);houseSelect();$('#itemid').value=i?.id||'';$('#itemtitle').textContent=i?'Modifica capo':'Aggiungi capo';$('#name').value=i?.nome||'';$('#brand').value=i?.marca||'';$('#category').value=i?.categoria||'';$('#quantity').value=i?.quantita||1;$('#itemhouse').value=i?.casa_id||hid||houses[0]?.id;$('#color').value=i?.colore||'';$('#season').value=i?.stagione||"Tutto l'anno";$('#description').value=i?.descrizione||'';photoPath=i?.foto_path||null;$('#preview').style.display='none';if(photoPath){const u=await surl(photoPath);if(u){$('#preview').src=u;$('#preview').style.display='block'}}$('#deleteitem').style.display=i?'block':'none';$('#itemdlg').showModal()}
+async function upload(f){if(!f)return photoPath;const ext=(f.name.split('.').pop()||'jpg').replace(/\W/g,'')||'jpg',path=`${user.id}/${crypto.randomUUID()}.${ext}`;const{error}=await sb.storage.from('foto-vestiti').upload(path,f,{contentType:f.type});if(error)throw error;return path}
+$('#itemform').onsubmit=async e=>{e.preventDefault();busy(true);try{const old=items.find(x=>x.id===$('#itemid').value),f=$('#pcamera').files[0]||$('#plibrary').files[0],fp=await upload(f),payload={user_id:user.id,casa_id:$('#itemhouse').value,nome:$('#name').value.trim(),marca:$('#brand').value.trim()||null,categoria:$('#category').value.trim()||null,quantita:Math.max(1,parseInt($('#quantity').value)||1),colore:$('#color').value.trim()||null,stagione:$('#season').value,descrizione:$('#description').value.trim()||null,foto_path:fp,updated_at:new Date().toISOString()};let r=old?await sb.from('vestiti').update(payload).eq('id',old.id).select().single():await sb.from('vestiti').insert(payload).select().single();if(r.error)throw r.error;$('#itemdlg').close();await Promise.all([loadHouses(),cats(),loadItems(true)]);renderHouse()}catch(x){alert(x.message||x)}finally{busy(false)}}
+async function addBag(id){const i=items.find(x=>x.id===id);let q=1;if(i.quantita>1){const a=prompt(`Quanti "${i.nome}" in Valigia? Disponibili: ${i.quantita}`,'1');if(a===null)return;q=parseInt(a)}if(!Number.isInteger(q)||q<1||q>i.quantita)return alert('Quantità non valida');const{error}=await sb.rpc('aggiungi_a_valigia',{p_vestito:id,p_quantita:q});alert(error?error.message:'Aggiunto alla Valigia')}
+async function loadBag(reset=false){if(reset){boffset=0;bag=[];bsel.clear()}const{data,error}=await sb.rpc('lista_valigia',{p_limit:PAGE,p_offset:boffset});if(error)throw error;bag=reset?(data||[]):bag.concat(data||[]);boffset=bag.length;$('#bagmore').style.display=(data||[]).length===PAGE?'block':'none';renderBag()}
+function renderBag(){$('#bagdest').innerHTML=houses.map(h=>`<option value="${h.id}">${esc(h.nome)}</option>`).join('');$('#baglist').innerHTML=bag.length?bag.map(x=>`<div class="card bagrow"><input type="checkbox" data-bs="${x.valigia_id}" ${bsel.has(x.valigia_id)?'checked':''}><div><b>${esc(x.nome)}</b><div class="meta">${esc(x.marca||'Senza marca')} · ${esc(x.casa_nome)} · disp. ${x.quantita_disponibile}</div></div><div class="row"><input type="number" min="1" max="${x.quantita_disponibile}" value="${x.quantita_valigia}" data-bq="${x.valigia_id}"><button class="danger" data-bd="${x.valigia_id}">×</button></div></div>`).join(''):`<div class="empty">Valigia vuota</div>`;document.querySelectorAll('[data-bs]').forEach(c=>c.onchange=()=>{c.checked?bsel.add(c.dataset.bs):bsel.delete(c.dataset.bs);$('#bagsel').textContent=bsel.size+' selezionati'});document.querySelectorAll('[data-bd]').forEach(b=>b.onclick=async()=>{await sb.from('valigia').delete().eq('id',b.dataset.bd);await loadBag(true)});document.querySelectorAll('[data-bq]').forEach(n=>n.onchange=async()=>{const x=bag.find(z=>z.valigia_id===n.dataset.bq),q=parseInt(n.value);if(!Number.isInteger(q)||q<1||q>x.quantita_disponibile){alert('Quantità non valida');return loadBag(true)}const{error}=await sb.rpc('aggiungi_a_valigia',{p_vestito:x.vestito_id,p_quantita:q});if(error)alert(error.message)});$('#bagsel').textContent=bsel.size+' selezionati'}
+async function moveBag(){const m=[];for(const id of bsel){const x=bag.find(z=>z.valigia_id===id);if(x.casa_id===$('#bagdest').value)return alert(`${x.nome} è già nella casa scelta`);let q=x.quantita_valigia;if(q>1){const a=prompt(`Quanti "${x.nome}" spostare davvero? Valigia: ${q}, disponibili: ${x.quantita_disponibile}`,q);if(a===null)return;q=parseInt(a)}if(!Number.isInteger(q)||q<1||q>x.quantita_disponibile)return alert('Quantità non valida');m.push({vestito_id:x.vestito_id,quantita:q})}if(!m.length)return;busy(true);const{error}=await sb.rpc('sposta_capi',{p_movimenti:m,p_destinazione:$('#bagdest').value});busy(false);if(error)return alert(error.message);await Promise.all([loadHouses(),loadBag(true)]);alert('Spostamento completato. La Valigia resta una lista indipendente.')}
+async function gsearch(reset=true){const q=$('#gsearch').value.trim();if(!q){$('#gres').innerHTML='';$('#gmore').style.display='none';goffset=0;return}if(reset)goffset=0;const{data,error}=await sb.rpc('cerca_vestiti_globale',{p_query:q,p_limit:40,p_offset:goffset});if(error)return;if(reset)$('#gres').innerHTML='';$('#gres').insertAdjacentHTML('beforeend',(data||[]).map(x=>`<button class="card hit" data-gh="${x.casa_id}"><div class="grow"><b>${esc(x.nome)}</b><div class="meta">${esc(x.marca||'Senza marca')} · quantità ${x.quantita} · ${esc(x.casa_nome)}</div></div>›</button>`).join(''));document.querySelectorAll('[data-gh]').forEach(b=>b.onclick=()=>openHouse(b.dataset.gh));goffset+=(data||[]).length;$('#gmore').style.display=(data||[]).length===40?'block':'none'}
+async function history(){const{data,error}=await sb.from('trasferimenti').select('batch_id,created_at,da_casa_id,a_casa_id').eq('user_id',user.id).order('created_at',{ascending:false}).limit(1).maybeSingle();if(error)return alert(error.message);lastBatch=data?.batch_id||null;$('#hist').innerHTML=data?`<div class="card" style="padding:11px"><b>${esc(houses.find(h=>h.id===data.da_casa_id)?.nome||'Casa')} → ${esc(houses.find(h=>h.id===data.a_casa_id)?.nome||'Casa')}</b><div class="meta">${new Date(data.created_at).toLocaleString('it-IT')}</div></div>`:'<div class="empty">Nessun trasferimento</div>';$('#undo').style.display=data?'inline-block':'none';$('#histdlg').showModal()}
+$('#login').onclick=async()=>{const{error}=await sb.auth.signInWithPassword({email:$('#email').value.trim(),password:$('#password').value});$('#authmsg').textContent=error?.message||''};$('#signup').onclick=async()=>{const{error}=await sb.auth.signUp({email:$('#email').value.trim(),password:$('#password').value});$('#authmsg').textContent=error?.message||'Controlla la tua email'};$('#logout').onclick=()=>sb.auth.signOut();$('#back').onclick=home;$('#add').onclick=()=>openItem();$('#all').onclick=async()=>{mode='all';opencat=null;$('#catfilter').value='';await loadItems(true);renderHouse()};$('#categories').onclick=()=>{mode='categories';selected.clear();renderHouse()};$('#catfilter').onchange=async()=>{opencat=null;await loadItems(true);renderHouse()};$('#search').oninput=()=>{clearTimeout(gtimer);gtimer=setTimeout(async()=>{opencat=null;await loadItems(true);renderHouse()},220)};$('#more').onclick=async()=>{await loadItems(false);renderHouse()};$('#selectall').onclick=()=>{const ids=items.map(x=>x.id),a=ids.every(x=>selected.has(x));ids.forEach(x=>a?selected.delete(x):selected.add(x));renderHouse()};$('#move').onclick=move;
+$('#camera').onclick=()=>$('#pcamera').click();$('#library').onclick=()=>$('#plibrary').click();function prev(e){const f=e.target.files[0];if(f){$('#preview').src=URL.createObjectURL(f);$('#preview').style.display='block'}}$('#pcamera').onchange=prev;$('#plibrary').onchange=prev;$('#closeitem').onclick=$('#cancelitem').onclick=()=>$('#itemdlg').close();$('#deleteitem').onclick=async()=>{const id=$('#itemid').value;if(!confirm('Eliminare?'))return;const{error}=await sb.from('vestiti').delete().eq('id',id);if(error)return alert(error.message);$('#itemdlg').close();await Promise.all([loadHouses(),cats(),loadItems(true)]);renderHouse()};
+$('#bagBtn').onclick=async()=>{page('bag');await loadBag(true)};$('#bagback').onclick=home;$('#bagmore').onclick=()=>loadBag(false);$('#clearbag').onclick=async()=>{if(confirm('Svuotare la Valigia?')){await sb.from('valigia').delete().eq('user_id',user.id);await loadBag(true)}};$('#bagmove').onclick=moveBag;$('#gsearch').oninput=()=>{clearTimeout(gtimer);gtimer=setTimeout(()=>gsearch(true),220)};$('#gmore').onclick=()=>gsearch(false);$('#historyBtn').onclick=history;$('#closehist').onclick=()=>$('#histdlg').close();$('#undo').onclick=async()=>{if(!lastBatch)return;busy(true);const{error}=await sb.rpc('annulla_trasferimento_batch',{p_batch:lastBatch});busy(false);if(error)return alert(error.message);$('#histdlg').close();await Promise.all([loadHouses(),cats(),loadItems(true)]);renderHouse()};
+$('#excelBtn').onclick=()=>$('#excel').click();$('#excel').onchange=async e=>{const f=e.target.files[0];if(!f)return;busy(true);try{const wb=XLSX.read(await f.arrayBuffer(),{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});for(const raw of rows){const n={};Object.keys(raw).forEach(k=>n[k.trim().toLowerCase()]=raw[k]);const hn=String(n.casa||'').trim(),nome=String(n['nome capo']||n.nome||'').trim();if(!hn||!nome)continue;let h=houses.find(x=>x.nome.toLowerCase()===hn.toLowerCase());if(!h){const r=await sb.from('case').insert({user_id:user.id,nome:hn,icona:'🏠'}).select().single();if(r.error)throw r.error;h=r.data;houses.push(h)}const r=await sb.from('vestiti').insert({user_id:user.id,casa_id:h.id,nome,marca:String(n.marca||'').trim()||null,categoria:String(n.categoria||'').trim()||null,quantita:Math.max(1,parseInt(n['quantità']||n.quantita||1)||1),colore:String(n.colore||'').trim()||null,stagione:String(n.stagione||"Tutto l'anno").trim()||"Tutto l'anno",descrizione:String(n.descrizione||n.note||'').trim()||null});if(r.error)throw r.error}await loadHouses();home();alert('Importazione completata')}catch(x){alert(x.message||x)}finally{busy(false)}};
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));init();
+</script></body></html>

@@ -3,7 +3,7 @@
   "short_name": "Guardaroba",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f7f6f2",
+  "background_color": "#f6f5f1",
   "theme_color": "#171717",
   "icons": [
     {
