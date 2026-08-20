@@ -19,7 +19,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;ma
 .auth{max-width:430px;margin:9vh auto;padding:25px}.auth h2{margin:0 0 6px}.auth input{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;margin:7px 0}.auth-actions{display:flex;gap:8px;margin-top:10px}#authMsg{margin-top:10px;min-height:20px}
 .houses{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:15px}.house{padding:20px;min-height:170px;text-align:left;display:flex;flex-direction:column;justify-content:space-between}.house:hover{transform:translateY(-1px)}.house .ico{font-size:38px}.house .name{font-size:21px;font-weight:850;margin-top:14px}.new{border-style:dashed;background:transparent;box-shadow:none;align-items:center;justify-content:center;color:var(--muted)}
 .topbar,.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:15px}.topbar h2{margin:0;font-size:26px}.grow{flex:1}.toolbar input,.toolbar select{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:white}.search{flex:1;min-width:180px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}.item{overflow:hidden;position:relative}.thumb{aspect-ratio:4/3;background:#eceae5;display:flex;align-items:center;justify-content:center;color:#999;overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover}.body{padding:12px}.body h3{margin:0 0 5px;font-size:16px}.meta{font-size:13px;color:var(--muted);line-height:1.45}.check{position:absolute;left:10px;top:10px;width:24px;height:24px;accent-color:#111;z-index:2}.edit{width:100%;margin-top:9px;padding:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}.category-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:16px}.category-card{padding:18px;text-align:left;min-height:130px;display:flex;flex-direction:column;justify-content:space-between}.category-card .folder{font-size:34px}.category-card .catname{font-size:18px;font-weight:850;margin-top:10px}.modebar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.modebar button.active{background:var(--dark);color:white}.item{overflow:hidden;position:relative}.thumb{aspect-ratio:4/3;background:#eceae5;display:flex;align-items:center;justify-content:center;color:#999;overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover}.body{padding:12px}.body h3{margin:0 0 5px;font-size:16px}.meta{font-size:13px;color:var(--muted);line-height:1.45}.check{position:absolute;left:10px;top:10px;width:24px;height:24px;accent-color:#111;z-index:2}.edit{width:100%;margin-top:9px;padding:8px}
 .transfer{display:none;position:sticky;bottom:12px;background:#171717;color:#fff;border-radius:16px;padding:12px;gap:10px;align-items:center;margin-top:15px;box-shadow:0 14px 35px rgba(0,0,0,.2);z-index:5}.transfer.show{display:flex}.transfer select{padding:9px;border:0;border-radius:10px}
 .empty{grid-column:1/-1;text-align:center;padding:50px 15px;color:var(--muted)}.empty .emoji{font-size:42px}
 dialog{border:0;border-radius:20px;padding:0;width:min(570px,calc(100% - 24px));box-shadow:0 30px 80px rgba(0,0,0,.28)}dialog::backdrop{background:rgba(0,0,0,.38)}form,.dialog-body{padding:22px}.formhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.formhead h2{margin:0}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}label{display:block;font-size:13px;font-weight:750;margin-bottom:5px}.fields input,.fields select,.fields textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:11px}textarea{min-height:80px;resize:vertical}.preview{display:none;width:100%;max-height:240px;object-fit:cover;border-radius:13px;margin-top:8px}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
@@ -45,7 +45,7 @@ dialog{border:0;border-radius:20px;padding:0;width:min(570px,calc(100% - 24px));
 
 <section class="view" id="appView">
 <header>
- <div><h1>Guardaroba</h1><div class="sub"><span id="userLabel"></span> · versione 1.3</div></div>
+ <div><h1>Guardaroba</h1><div class="sub"><span id="userLabel"></span> · versione 1.5</div></div>
  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ghost" id="importBtn">Importa Excel</button><button class="ghost" id="logoutBtn">Esci</button></div>
 </header>
 <input id="excelFile" type="file" accept=".xlsx,.xls" hidden>
@@ -54,8 +54,13 @@ dialog{border:0;border-radius:20px;padding:0;width:min(570px,calc(100% - 24px));
 <section class="view" id="houseView">
  <div class="topbar">
   <button class="ghost" id="backBtn">← Case</button><h2 id="houseTitle"></h2><div class="grow"></div>
-  <button class="ghost" id="lastBtn">Cosa hai portato l'ultima volta</button><button class="primary" id="addBtn">+ Capo</button>
+  <button class="ghost" id="lastBtn">Cosa hai portato l'ultima volta</button><button class="danger" id="deleteHouseBtn">Elimina casa</button><button class="primary" id="addBtn">+ Capo</button>
  </div>
+ <div class="modebar">
+  <button class="ghost active" id="allModeBtn">Tutti i capi</button>
+  <button class="ghost" id="categoryModeBtn">Categorie</button>
+ </div>
+ <div class="category-grid" id="categoryGrid" style="display:none"></div>
  <div class="toolbar"><input class="search" id="search" placeholder="Cerca un capo..."><select id="catFilter"><option value="">Tutte le categorie</option></select><button class="ghost" id="selectAll">Seleziona tutto</button></div>
  <div class="grid" id="grid"></div>
  <div class="transfer" id="transferBar"><strong id="selCount"></strong><div class="grow"></div><span>Sposta in</span><select id="targetHouse"></select><button class="secondary" id="moveBtn">Sposta</button></div>
@@ -76,7 +81,15 @@ dialog{border:0;border-radius:20px;padding:0;width:min(570px,calc(100% - 24px));
   <div><label>Stagione</label><select id="season"><option>Tutto l'anno</option><option>Estate</option><option>Inverno</option><option>Mezza stagione</option></select></div>
   <div><label>Marca</label><input id="brand"></div>
   <div class="full"><label>Descrizione</label><textarea id="description"></textarea></div>
-  <div class="full"><label>Foto (facoltativa)</label><input id="photo" type="file" accept="image/*" capture="environment"><img class="preview" id="preview"></div>
+  <div class="full"><label>Foto (facoltativa)</label>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button type="button" class="ghost" id="cameraBtn">📷 Scatta foto</button>
+    <button type="button" class="ghost" id="libraryBtn">🖼️ Scegli dalla libreria</button>
+  </div>
+  <input id="photoCamera" type="file" accept="image/*" capture="environment" hidden>
+  <input id="photoLibrary" type="file" accept="image/*" hidden>
+  <img class="preview" id="preview">
+</div>
  </div>
  <div class="actions"><button type="button" class="danger" id="deleteBtn" style="display:none;margin-right:auto">Elimina</button><button type="button" class="ghost" id="cancelItem">Annulla</button><button class="primary">Salva</button></div>
 </form>
@@ -94,7 +107,7 @@ dialog{border:0;border-radius:20px;padding:0;width:min(570px,calc(100% - 24px));
 const SUPABASE_URL="https://atupzrgrgojvztbcrlua.supabase.co", SUPABASE_KEY="sb_publishable_5slDv8ZTohQD_16E2r7pdw_m6jijofi";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=s=>document.querySelector(s);
-let user=null,houses=[],items=[],currentHouse=null,selected=new Set(),editPhotoPath=null,lastTransfer=null;
+let user=null,houses=[],items=[],currentHouse=null,selected=new Set(),editPhotoPath=null,lastTransfer=null,houseMode='all',openCategory=null;
 const busy=v=>$('#busy').classList.toggle('show',v);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function show(id){['authView','appView'].forEach(x=>$('#'+x).classList.toggle('active',x===id))}
@@ -119,7 +132,7 @@ async function loadAll(){
  houses=h.data||[];items=i.data||[];renderHome();
 }
 function renderHome(){
- subview('homeView'); currentHouse=null; selected.clear();
+ subview('homeView'); currentHouse=null; selected.clear(); houseMode='all'; openCategory=null;
  $('#houses').innerHTML=houses.map(h=>{const n=items.filter(i=>i.casa_id===h.id).length;return `<button class="card house" data-house="${h.id}"><div><div class="ico">🏠</div><div class="name">${esc(h.nome)}</div></div><div class="muted">${n} ${n===1?'capo':'capi'}</div></button>`}).join('')+
  `<button class="card house new" id="newHouse"><div class="ico">＋</div><b>Aggiungi casa</b></button>`;
  document.querySelectorAll('[data-house]').forEach(b=>b.onclick=()=>openHouse(b.dataset.house)); $('#newHouse').onclick=addHouse;
@@ -129,15 +142,34 @@ async function addHouse(){
  busy(true);const {data,error}=await sb.from('case').insert({nome:nome.trim(),user_id:user.id}).select().single();busy(false);
  if(error){alert(error.message);return} houses.push(data);renderHome();
 }
-function openHouse(id){currentHouse=id;selected.clear();$('#search').value='';subview('houseView');renderHouse()}
+function openHouse(id){currentHouse=id;selected.clear();houseMode='all';openCategory=null;$('#search').value='';subview('houseView');renderHouse()}
 async function signedUrl(path){if(!path)return null;const {data}=await sb.storage.from('foto-vestiti').createSignedUrl(path,3600);return data?.signedUrl||null}
 async function renderHouse(){
- const h=houses.find(x=>x.id===currentHouse);if(!h)return renderHome();$('#houseTitle').textContent=h.nome;
+ const h=houses.find(x=>x.id===currentHouse);if(!h)return renderHome();$('#houseTitle').textContent=openCategory?`${h.nome} · ${openCategory}`:h.nome;
+ $('#allModeBtn').classList.toggle('active',houseMode==='all');
+ $('#categoryModeBtn').classList.toggle('active',houseMode==='categories');
+
  const cats=[...new Set(items.filter(i=>i.casa_id===currentHouse).map(i=>i.categoria).filter(Boolean))].sort();let cv=$('#catFilter').value;
  $('#catFilter').innerHTML='<option value="">Tutte le categorie</option>'+cats.map(c=>`<option>${esc(c)}</option>`).join('');if(cats.includes(cv))$('#catFilter').value=cv;
- const q=$('#search').value.toLowerCase().trim(),cat=$('#catFilter').value;
- const vis=items.filter(i=>i.casa_id===currentHouse&&(!q||[i.nome,i.categoria,i.colore,i.marca,i.descrizione].join(' ').toLowerCase().includes(q))&&(!cat||i.categoria===cat));
+ const categoryGrid=$('#categoryGrid');
+ if(houseMode==='categories'){
+   const counts={};
+   items.filter(i=>i.casa_id===currentHouse).forEach(i=>{const c=(i.categoria||'Senza categoria').trim()||'Senza categoria';counts[c]=(counts[c]||0)+(i.quantita||1)});
+   categoryGrid.style.display='grid';
+   categoryGrid.innerHTML=Object.entries(counts).sort((a,b)=>a[0].localeCompare(b[0],'it')).map(([c,n])=>`<button class="card category-card" data-catfolder="${esc(c)}"><div><div class="folder">📁</div><div class="catname">${esc(c)}</div></div><div class="muted">${n} ${n===1?'pezzo':'pezzi'}</div></button>`).join('') || `<div class="empty"><div class="emoji">📁</div><b>Nessuna categoria</b></div>`;
+   categoryGrid.querySelectorAll('[data-catfolder]').forEach(b=>b.onclick=()=>{openCategory=b.dataset.catfolder;houseMode='all';$('#catFilter').value=openCategory==='Senza categoria'?'':openCategory;renderHouse()});
+ }else{
+   categoryGrid.style.display='none';
+ }
+ const q=$('#search').value.toLowerCase().trim();
+ let cat=$('#catFilter').value;
+ if(openCategory){
+   cat=openCategory==='Senza categoria'?'__NONE__':openCategory;
+ }
+ const vis=items.filter(i=>i.casa_id===currentHouse&&(!q||[i.nome,i.categoria,i.colore,i.marca,i.descrizione].join(' ').toLowerCase().includes(q))&&(!cat||(cat==='__NONE__'?!(i.categoria||'').trim():i.categoria===cat)));
  $('#grid').innerHTML=vis.length?vis.map(i=>`<article class="card item"><input class="check" type="checkbox" data-sel="${i.id}" ${selected.has(i.id)?'checked':''}><div class="thumb" id="ph-${i.id}">${i.foto_path?'Caricamento foto…':'Nessuna foto'}</div><div class="body"><h3>${esc(i.nome)}${(i.quantita||1)>1?' × '+(i.quantita||1):''}</h3><div class="meta">${esc(i.categoria||'Senza categoria')}${i.colore?' · '+esc(i.colore):''}${i.stagione?' · '+esc(i.stagione):''}</div><div style="display:flex;gap:7px;margin-top:9px"><button class="ghost" style="flex:1;padding:8px" data-edit="${i.id}">Modifica</button><button class="ghost" style="flex:1;padding:8px" data-dup="${i.id}">Duplica</button></div></div></article>`).join(''):`<div class="empty"><div class="emoji">👕</div><b>Nessun capo in questa casa</b><br>Aggiungine uno.</div>`;
+ $('#grid').style.display=houseMode==='categories'?'none':'grid';
+ $('#search').parentElement.style.display=houseMode==='categories'?'none':'flex';
  document.querySelectorAll('[data-sel]').forEach(c=>c.onchange=()=>{c.checked?selected.add(c.dataset.sel):selected.delete(c.dataset.sel);renderTransfer()});
  document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openItem(b.dataset.edit));
  document.querySelectorAll('[data-dup]').forEach(b=>b.onclick=()=>duplicateItem(b.dataset.dup));
@@ -177,7 +209,7 @@ function renderTransfer(){$('#selCount').textContent=selected.size+' selezionat'
 function fillHouseSelect(){$('#itemHouse').innerHTML=houses.map(h=>`<option value="${h.id}">${esc(h.nome)}</option>`).join('')}
 async function openItem(id){
  const i=items.find(x=>x.id===id);fillHouseSelect();$('#itemId').value=i?.id||'';$('#itemTitle').textContent=i?'Modifica capo':'Aggiungi capo';
- $('#name').value=i?.nome||'';$('#category').value=i?.categoria||'';$('#quantity').value=i?.quantita||1;$('#color').value=i?.colore||'';$('#season').value=i?.stagione||"Tutto l'anno";$('#brand').value=i?.marca||'';$('#description').value=i?.descrizione||'';$('#itemHouse').value=i?.casa_id||currentHouse||houses[0]?.id||'';$('#photo').value='';editPhotoPath=i?.foto_path||null;
+ $('#name').value=i?.nome||'';$('#category').value=i?.categoria||'';$('#quantity').value=i?.quantita||1;$('#color').value=i?.colore||'';$('#season').value=i?.stagione||"Tutto l'anno";$('#brand').value=i?.marca||'';$('#description').value=i?.descrizione||'';$('#itemHouse').value=i?.casa_id||currentHouse||houses[0]?.id||'';$('#photoCamera').value='';$('#photoLibrary').value='';editPhotoPath=i?.foto_path||null;
  $('#preview').style.display='none';if(editPhotoPath){const u=await signedUrl(editPhotoPath);if(u){$('#preview').src=u;$('#preview').style.display='block'}}
  $('#deleteBtn').style.display=i?'block':'none';$('#itemDialog').showModal();
 }
@@ -192,7 +224,7 @@ $('#itemForm').onsubmit=async e=>{
  e.preventDefault();if(!houses.length){alert('Crea prima una casa.');return}
  busy(true);
  try{
-  const old=items.find(x=>x.id===$('#itemId').value);const newPath=await uploadPhoto($('#photo').files[0]);
+  const old=items.find(x=>x.id===$('#itemId').value);const chosenFile=$('#photoCamera').files[0]||$('#photoLibrary').files[0];const newPath=await uploadPhoto(chosenFile);
   const payload={user_id:user.id,casa_id:$('#itemHouse').value,nome:$('#name').value.trim(),categoria:$('#category').value.trim()||null,quantita:Math.max(1,parseInt($('#quantity').value)||1),colore:$('#color').value.trim()||null,stagione:$('#season').value,marca:$('#brand').value.trim()||null,descrizione:$('#description').value.trim()||null,foto_path:newPath,updated_at:new Date().toISOString()};
   let res;
   if(old)res=await sb.from('vestiti').update(payload).eq('id',old.id).eq('user_id',user.id).select().single();
@@ -203,7 +235,14 @@ $('#itemForm').onsubmit=async e=>{
   $('#itemDialog').close();renderHouse();
  }catch(err){alert(err.message||err)}finally{busy(false)}
 };
-$('#photo').onchange=e=>{const f=e.target.files[0];if(f){$('#preview').src=URL.createObjectURL(f);$('#preview').style.display='block'}};
+function previewChosenFile(input){
+ const f=input.files[0];
+ if(f){$('#preview').src=URL.createObjectURL(f);$('#preview').style.display='block'}
+}
+$('#cameraBtn').onclick=()=>$('#photoCamera').click();
+$('#libraryBtn').onclick=()=>$('#photoLibrary').click();
+$('#photoCamera').onchange=e=>{ if(e.target.files[0]) $('#photoLibrary').value=''; previewChosenFile(e.target) };
+$('#photoLibrary').onchange=e=>{ if(e.target.files[0]) $('#photoCamera').value=''; previewChosenFile(e.target) };
 $('#deleteBtn').onclick=async()=>{
  const id=$('#itemId').value,i=items.find(x=>x.id===id);if(!i||!confirm('Eliminare questo capo?'))return;busy(true);
  const {error}=await sb.from('vestiti').delete().eq('id',id).eq('user_id',user.id);if(!error&&i.foto_path)await sb.storage.from('foto-vestiti').remove([i.foto_path]);busy(false);
@@ -217,6 +256,25 @@ $('#moveBtn').onclick=async()=>{
  if(tr.error){busy(false);return alert('Capi spostati, ma non è stato possibile salvare lo storico: '+tr.error.message)}
  items.forEach(i=>{if(ids.includes(i.id))i.casa_id=target});selected.clear();busy(false);renderHouse();
 };
+async function deleteCurrentHouse(){
+ const h=houses.find(x=>x.id===currentHouse);if(!h)return;
+ const count=items.filter(i=>i.casa_id===currentHouse).length;
+ if(count>0){
+   alert(`Non puoi eliminare "${h.nome}" perché contiene ancora ${count} ${count===1?'capo':'capi'}. Sposta o elimina prima i vestiti.`);
+   return;
+ }
+ if(!confirm(`Eliminare definitivamente la casa "${h.nome}"?`))return;
+ busy(true);
+ try{
+   const {error}=await sb.from('case').delete().eq('id',currentHouse).eq('user_id',user.id);
+   if(error)throw error;
+   houses=houses.filter(x=>x.id!==currentHouse);
+   currentHouse=null;
+   renderHome();
+ }catch(err){alert(err.message||err)}
+ finally{busy(false)}
+}
+
 async function showLast(){
  busy(true);const {data,error}=await sb.from('trasferimenti').select('*').eq('user_id',user.id).eq('a_casa_id',currentHouse).order('created_at',{ascending:false}).limit(1).maybeSingle();busy(false);
  if(error)return alert(error.message);lastTransfer=data;
@@ -235,8 +293,10 @@ $('#undoBtn').onclick=async()=>{
 };
 $('#loginBtn').onclick=async()=>{msg('Accesso…');const {error}=await sb.auth.signInWithPassword({email:$('#email').value.trim(),password:$('#password').value});msg(error?error.message:'')}
 $('#signupBtn').onclick=async()=>{msg('Creazione account…');const {data,error}=await sb.auth.signUp({email:$('#email').value.trim(),password:$('#password').value});msg(error?error.message:(data.session?'Account creato.':'Account creato: controlla la tua email per confermare.'))}
-$('#logoutBtn').onclick=()=>sb.auth.signOut();$('#backBtn').onclick=renderHome;$('#addBtn').onclick=()=>openItem();$('#closeItem').onclick=$('#cancelItem').onclick=()=>$('#itemDialog').close();$('#lastBtn').onclick=showLast;$('#closeHistory').onclick=$('#closeHistory2').onclick=()=>$('#historyDialog').close();
-$('#search').oninput=renderHouse;$('#catFilter').onchange=renderHouse;$('#selectAll').onclick=()=>{const ids=[...document.querySelectorAll('[data-sel]')].map(x=>x.dataset.sel),all=ids.length&&ids.every(id=>selected.has(id));ids.forEach(id=>all?selected.delete(id):selected.add(id));renderHouse()};
+$('#logoutBtn').onclick=()=>sb.auth.signOut();$('#backBtn').onclick=renderHome;$('#addBtn').onclick=()=>openItem();$('#closeItem').onclick=$('#cancelItem').onclick=()=>$('#itemDialog').close();$('#lastBtn').onclick=showLast;$('#deleteHouseBtn').onclick=deleteCurrentHouse;$('#closeHistory').onclick=$('#closeHistory2').onclick=()=>$('#historyDialog').close();
+$('#allModeBtn').onclick=()=>{houseMode='all';openCategory=null;$('#catFilter').value='';renderHouse()};
+$('#categoryModeBtn').onclick=()=>{houseMode='categories';openCategory=null;selected.clear();renderHouse()};
+$('#search').oninput=renderHouse;$('#catFilter').onchange=()=>{openCategory=null;renderHouse()};$('#selectAll').onclick=()=>{const ids=[...document.querySelectorAll('[data-sel]')].map(x=>x.dataset.sel),all=ids.length&&ids.every(id=>selected.has(id));ids.forEach(id=>all?selected.delete(id):selected.add(id));renderHouse()};
 
 $('#importBtn').onclick=()=>$('#excelFile').click();
 $('#excelFile').onchange=async e=>{

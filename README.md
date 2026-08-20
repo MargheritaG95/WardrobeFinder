@@ -20,3 +20,12 @@ Le tabelle e le foto sono protette da Row Level Security (RLS) sul database.
 
 ## Aggiornamento quantità
 Ogni capo ha ora un campo Quantità (minimo 1). L'import Excel accetta anche la colonna `Quantità` o `Quantita`.
+
+## Versione 1.4
+- Pulsanti separati per scattare una foto o sceglierla dalla libreria.
+- Eliminazione casa consentita solo quando la casa è vuota.
+
+## Versione 1.5
+- Vista per categorie dentro ogni casa.
+- Cartelle categoria con conteggio quantità.
+- Possibilità di tornare a Tutti i capi in qualsiasi momento.
