@@ -17,3 +17,6 @@ Dopo la conferma, accedi con email e password.
 ## Sicurezza
 Nel frontend è presente solo la chiave Supabase *publishable*, progettata per essere pubblica.
 Le tabelle e le foto sono protette da Row Level Security (RLS) sul database.
+
+## Aggiornamento quantità
+Ogni capo ha ora un campo Quantità (minimo 1). L'import Excel accetta anche la colonna `Quantità` o `Quantita`.

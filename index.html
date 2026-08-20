@@ -70,6 +70,7 @@ dialog{border:0;border-radius:20px;padding:0;width:min(570px,calc(100% - 24px));
  <div class="fields">
   <div><label>Nome *</label><input id="name" required></div>
   <div><label>Categoria</label><input id="category" placeholder="Es. Camicie"></div>
+  <div><label>Quantità *</label><input id="quantity" type="number" min="1" step="1" value="1" required></div>
   <div><label>Casa *</label><select id="itemHouse" required></select></div>
   <div><label>Colore</label><input id="color"></div>
   <div><label>Stagione</label><select id="season"><option>Tutto l'anno</option><option>Estate</option><option>Inverno</option><option>Mezza stagione</option></select></div>
@@ -136,18 +137,47 @@ async function renderHouse(){
  $('#catFilter').innerHTML='<option value="">Tutte le categorie</option>'+cats.map(c=>`<option>${esc(c)}</option>`).join('');if(cats.includes(cv))$('#catFilter').value=cv;
  const q=$('#search').value.toLowerCase().trim(),cat=$('#catFilter').value;
  const vis=items.filter(i=>i.casa_id===currentHouse&&(!q||[i.nome,i.categoria,i.colore,i.marca,i.descrizione].join(' ').toLowerCase().includes(q))&&(!cat||i.categoria===cat));
- $('#grid').innerHTML=vis.length?vis.map(i=>`<article class="card item"><input class="check" type="checkbox" data-sel="${i.id}" ${selected.has(i.id)?'checked':''}><div class="thumb" id="ph-${i.id}">${i.foto_path?'Caricamento foto…':'Nessuna foto'}</div><div class="body"><h3>${esc(i.nome)}</h3><div class="meta">${esc(i.categoria||'Senza categoria')}${i.colore?' · '+esc(i.colore):''}${i.stagione?' · '+esc(i.stagione):''}</div><button class="ghost edit" data-edit="${i.id}">Apri / modifica</button></div></article>`).join(''):`<div class="empty"><div class="emoji">👕</div><b>Nessun capo in questa casa</b><br>Aggiungine uno.</div>`;
+ $('#grid').innerHTML=vis.length?vis.map(i=>`<article class="card item"><input class="check" type="checkbox" data-sel="${i.id}" ${selected.has(i.id)?'checked':''}><div class="thumb" id="ph-${i.id}">${i.foto_path?'Caricamento foto…':'Nessuna foto'}</div><div class="body"><h3>${esc(i.nome)}${(i.quantita||1)>1?' × '+(i.quantita||1):''}</h3><div class="meta">${esc(i.categoria||'Senza categoria')}${i.colore?' · '+esc(i.colore):''}${i.stagione?' · '+esc(i.stagione):''}</div><div style="display:flex;gap:7px;margin-top:9px"><button class="ghost" style="flex:1;padding:8px" data-edit="${i.id}">Modifica</button><button class="ghost" style="flex:1;padding:8px" data-dup="${i.id}">Duplica</button></div></div></article>`).join(''):`<div class="empty"><div class="emoji">👕</div><b>Nessun capo in questa casa</b><br>Aggiungine uno.</div>`;
  document.querySelectorAll('[data-sel]').forEach(c=>c.onchange=()=>{c.checked?selected.add(c.dataset.sel):selected.delete(c.dataset.sel);renderTransfer()});
  document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openItem(b.dataset.edit));
+ document.querySelectorAll('[data-dup]').forEach(b=>b.onclick=()=>duplicateItem(b.dataset.dup));
  renderTargets();renderTransfer();
  for(const i of vis.filter(x=>x.foto_path)){signedUrl(i.foto_path).then(url=>{const p=$('#ph-'+i.id);if(p&&url)p.innerHTML=`<img src="${url}" alt="">`})}
 }
+async function duplicateItem(id){
+ const original=items.find(i=>i.id===id);if(!original)return;
+ busy(true);
+ try{
+  let newPhotoPath=null;
+  if(original.foto_path){
+    const signed=await signedUrl(original.foto_path);
+    if(signed){
+      const blob=await fetch(signed).then(r=>r.blob());
+      const ext=(original.foto_path.split('.').pop()||'jpg').replace(/[^a-zA-Z0-9]/g,'')||'jpg';
+      newPhotoPath=`${user.id}/${crypto.randomUUID()}.${ext}`;
+      const up=await sb.storage.from('foto-vestiti').upload(newPhotoPath,blob,{contentType:blob.type||undefined});
+      if(up.error)throw up.error;
+    }
+  }
+  const payload={
+    user_id:user.id,casa_id:original.casa_id,nome:original.nome,categoria:original.categoria,
+    quantita:original.quantita||1,colore:original.colore,stagione:original.stagione,
+    marca:original.marca,descrizione:original.descrizione,foto_path:newPhotoPath
+  };
+  const res=await sb.from('vestiti').insert(payload).select().single();
+  if(res.error)throw res.error;
+  items.unshift(res.data);
+  renderHouse();
+ }catch(err){alert(err.message||err)}
+ finally{busy(false)}
+}
+
 function renderTargets(){const other=houses.filter(h=>h.id!==currentHouse);$('#targetHouse').innerHTML=other.map(h=>`<option value="${h.id}">${esc(h.nome)}</option>`).join('');$('#moveBtn').disabled=!other.length}
 function renderTransfer(){$('#selCount').textContent=selected.size+' selezionat'+(selected.size===1?'o':'i');$('#transferBar').classList.toggle('show',selected.size>0)}
 function fillHouseSelect(){$('#itemHouse').innerHTML=houses.map(h=>`<option value="${h.id}">${esc(h.nome)}</option>`).join('')}
 async function openItem(id){
  const i=items.find(x=>x.id===id);fillHouseSelect();$('#itemId').value=i?.id||'';$('#itemTitle').textContent=i?'Modifica capo':'Aggiungi capo';
- $('#name').value=i?.nome||'';$('#category').value=i?.categoria||'';$('#color').value=i?.colore||'';$('#season').value=i?.stagione||"Tutto l'anno";$('#brand').value=i?.marca||'';$('#description').value=i?.descrizione||'';$('#itemHouse').value=i?.casa_id||currentHouse||houses[0]?.id||'';$('#photo').value='';editPhotoPath=i?.foto_path||null;
+ $('#name').value=i?.nome||'';$('#category').value=i?.categoria||'';$('#quantity').value=i?.quantita||1;$('#color').value=i?.colore||'';$('#season').value=i?.stagione||"Tutto l'anno";$('#brand').value=i?.marca||'';$('#description').value=i?.descrizione||'';$('#itemHouse').value=i?.casa_id||currentHouse||houses[0]?.id||'';$('#photo').value='';editPhotoPath=i?.foto_path||null;
  $('#preview').style.display='none';if(editPhotoPath){const u=await signedUrl(editPhotoPath);if(u){$('#preview').src=u;$('#preview').style.display='block'}}
  $('#deleteBtn').style.display=i?'block':'none';$('#itemDialog').showModal();
 }
@@ -163,7 +193,7 @@ $('#itemForm').onsubmit=async e=>{
  busy(true);
  try{
   const old=items.find(x=>x.id===$('#itemId').value);const newPath=await uploadPhoto($('#photo').files[0]);
-  const payload={user_id:user.id,casa_id:$('#itemHouse').value,nome:$('#name').value.trim(),categoria:$('#category').value.trim()||null,colore:$('#color').value.trim()||null,stagione:$('#season').value,marca:$('#brand').value.trim()||null,descrizione:$('#description').value.trim()||null,foto_path:newPath,updated_at:new Date().toISOString()};
+  const payload={user_id:user.id,casa_id:$('#itemHouse').value,nome:$('#name').value.trim(),categoria:$('#category').value.trim()||null,quantita:Math.max(1,parseInt($('#quantity').value)||1),colore:$('#color').value.trim()||null,stagione:$('#season').value,marca:$('#brand').value.trim()||null,descrizione:$('#description').value.trim()||null,foto_path:newPath,updated_at:new Date().toISOString()};
   let res;
   if(old)res=await sb.from('vestiti').update(payload).eq('id',old.id).eq('user_id',user.id).select().single();
   else res=await sb.from('vestiti').insert(payload).select().single();
@@ -193,7 +223,7 @@ async function showLast(){
  if(!data){$('#history').innerHTML='<div class="empty"><div class="emoji">🧳</div><b>Nessun trasferimento verso questa casa</b></div>';$('#undoBtn').style.display='none';$('#historyDialog').showModal();return}
  const from=houses.find(h=>h.id===data.da_casa_id)?.nome||'Casa precedente',to=houses.find(h=>h.id===data.a_casa_id)?.nome||'Casa';
  const moved=data.vestito_ids.map(id=>items.find(i=>i.id===id)).filter(Boolean);
- $('#history').innerHTML=`<div class="card" style="padding:14px;background:var(--soft)"><div class="muted">${new Date(data.created_at).toLocaleString('it-IT')}</div><b>${esc(from)} → ${esc(to)}</b></div>`+moved.map(i=>`<div class="history-item"><div class="history-thumb" id="hist-${i.id}">${i.foto_path?'…':'👕'}</div><div><b>${esc(i.nome)}</b><div class="meta">${esc(i.categoria||'')}</div></div></div>`).join('');
+ $('#history').innerHTML=`<div class="card" style="padding:14px;background:var(--soft)"><div class="muted">${new Date(data.created_at).toLocaleString('it-IT')}</div><b>${esc(from)} → ${esc(to)}</b></div>`+moved.map(i=>`<div class="history-item"><div class="history-thumb" id="hist-${i.id}">${i.foto_path?'…':'👕'}</div><div><b>${esc(i.nome)}${(i.quantita||1)>1?' × '+(i.quantita||1):''}</b><div class="meta">${esc(i.categoria||'')}</div></div></div>`).join('');
  $('#undoBtn').style.display=moved.some(i=>i.casa_id===data.a_casa_id)?'inline-block':'none';$('#historyDialog').showModal();
  for(const i of moved.filter(x=>x.foto_path))signedUrl(i.foto_path).then(u=>{const e=$('#hist-'+i.id);if(e&&u)e.innerHTML=`<img src="${u}">`});
 }
@@ -219,7 +249,7 @@ $('#excelFile').onchange=async e=>{
    const hn=String(n['casa']||'').trim(),nome=String(n['nome capo']||n['nome']||'').trim();if(!hn||!nome)continue;
    let h=houses.find(x=>x.nome.toLowerCase()===hn.toLowerCase());
    if(!h){const r=await sb.from('case').insert({user_id:user.id,nome:hn}).select().single();if(r.error)throw r.error;h=r.data;houses.push(h)}
-   const r=await sb.from('vestiti').insert({user_id:user.id,casa_id:h.id,nome,categoria:String(n['categoria']||'').trim()||null,colore:String(n['colore']||'').trim()||null,stagione:String(n['stagione']||"Tutto l'anno").trim()||"Tutto l'anno",marca:String(n['marca']||'').trim()||null,descrizione:String(n['descrizione']||n['note']||'').trim()||null}).select().single();
+   const r=await sb.from('vestiti').insert({user_id:user.id,casa_id:h.id,nome,categoria:String(n['categoria']||'').trim()||null,colore:String(n['colore']||'').trim()||null,stagione:String(n['stagione']||"Tutto l'anno").trim()||"Tutto l'anno",quantita:Math.max(1,parseInt(n['quantità']||n['quantita']||1)||1),marca:String(n['marca']||'').trim()||null,descrizione:String(n['descrizione']||n['note']||'').trim()||null}).select().single();
    if(r.error)throw r.error;items.unshift(r.data);count++;
   }
   renderHome();alert(count+' capi importati.');
