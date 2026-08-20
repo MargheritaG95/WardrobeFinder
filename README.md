@@ -29,3 +29,10 @@ Ogni capo ha ora un campo Quantità (minimo 1). L'import Excel accetta anche la 
 - Vista per categorie dentro ogni casa.
 - Cartelle categoria con conteggio quantità.
 - Possibilità di tornare a Tutti i capi in qualsiasi momento.
+
+## Versione 1.6
+- Correzione eliminazione case con storico trasferimenti.
+- Toolbar mobile più compatta.
+- 3 capi per riga sui telefoni piccoli.
+- Icone automatiche per categorie.
+- Emoji o foto personalizzata per le case.
