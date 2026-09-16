@@ -14,8 +14,9 @@ dialog{border:0;border-radius:17px;padding:0;width:min(550px,calc(100% - 18px));
 .lightbox{position:fixed;inset:0;background:#000c;z-index:200;display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}.lightbox.show{display:flex}.lightbox img{max-width:100%;max-height:100%;border-radius:12px;object-fit:contain}
 .crumbs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;font-size:12px}.crumbs button{background:none;border:0;color:#171717;font-weight:750;cursor:pointer;padding:2px 0}
 .stats{display:grid;gap:12px}.statcard{padding:16px}.statcard>b{display:block;font-size:14px;margin-bottom:2px}.statcard .sub{display:block;color:var(--muted);font-size:11px;margin-bottom:10px}
-.barrow{display:flex;align-items:center;gap:8px;margin:6px 0}.barrow .lbl{width:100px;flex:none;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.barrow .bar{height:8px;background:var(--soft);border-radius:4px;flex:1;overflow:hidden}.barrow .bar b{display:block;height:100%;background:#171717;margin:0;border-radius:4px}.barrow .val{width:26px;flex:none;text-align:right;font-size:11px;font-weight:750}
-.rebalance-row{padding:10px 0;border-top:1px solid var(--line)}.rebalance-row:first-child{border-top:0;padding-top:2px}.rebalance-row .rname{font-size:12px;font-weight:750;margin-bottom:6px}.hpills{display:flex;flex-wrap:wrap;gap:6px}.hpill{border-radius:8px;padding:3px 9px;font-size:11px;font-weight:750;background:var(--soft)}.hpill.zero{background:transparent;border:1px dashed var(--line);color:var(--muted);font-weight:600}.hpill.max{background:#171717;color:#fff}
+button.barrow{display:flex;width:100%;align-items:center;gap:8px;margin:2px 0;background:none;border:0;font:inherit;cursor:pointer;border-radius:8px;padding:4px}button.barrow:hover{background:var(--soft)}.barrow .lbl{width:100px;flex:none;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}.barrow .bar{height:8px;background:var(--soft);border-radius:4px;flex:1;overflow:hidden}.barrow .bar b{display:block;height:100%;background:#171717;margin:0;border-radius:4px}.barrow .val{width:26px;flex:none;text-align:right;font-size:11px;font-weight:750}
+button.rebalance-row{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);cursor:pointer;font:inherit;padding:10px 4px;border-radius:8px}button.rebalance-row:hover{background:var(--soft)}button.rebalance-row:first-child{border-top:0;padding-top:2px}.rebalance-row .rname{font-size:12px;font-weight:750;margin-bottom:6px}.hpills{display:flex;flex-wrap:wrap;gap:6px}.hpill{border-radius:8px;padding:3px 9px;font-size:11px;font-weight:750;background:var(--soft)}.hpill.zero{background:transparent;border:1px dashed var(--line);color:var(--muted);font-weight:600}.hpill.max{background:#171717;color:#fff}
+button.duprow{display:flex;width:100%;justify-content:space-between;gap:8px;background:none;border:0;font:inherit;font-size:12px;padding:5px 4px;cursor:pointer;border-radius:8px;text-align:left}button.duprow:hover{background:var(--soft)}
 .baglist{display:grid;gap:7px}.bagrow{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:9px}.bagrow input[type=number]{width:55px;padding:5px;border:1px solid var(--line);border-radius:7px}.bagbar{position:sticky;bottom:7px;background:#171717;color:#fff;border-radius:13px;padding:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}.bagbar select{padding:7px;border:0;border-radius:8px}#busy{position:fixed;inset:0;background:#ffffffb8;z-index:99;display:none;align-items:center;justify-content:center;font-weight:850}#busy.show{display:flex}
 @media(max-width:600px){.app{padding:8px}.houses{grid-template-columns:repeat(2,1fr);gap:6px}.house{min-height:105px;padding:9px}.grid{grid-template-columns:repeat(3,1fr);gap:5px}.body h3{font-size:10px}.meta{font-size:9px}.topbar h2{font-size:17px}.toolbar{display:grid;grid-template-columns:1fr auto}.toolbar input{grid-column:1/-1;width:100%}.modebar{display:grid;grid-template-columns:1fr 1fr}.cats{grid-template-columns:repeat(2,1fr)}.fields{grid-template-columns:1fr}.full{grid-column:auto}}
 </style></head><body><div id="busy">Caricamento…</div><div class="app">
@@ -217,10 +218,16 @@ async function openFromSearch(houseId,itemId){
  }
  openItem(itemId)
 }
-function groupSum(rows,keyFn,valFn,labelFn){
+function groupSum(rows,keyFn,valFn,labelFn,idFn){
  const m=new Map();
- rows.forEach(r=>{const k=keyFn(r);if(!k)return;if(!m.has(k))m.set(k,{key:labelFn?labelFn(r):k,tot:0,count:0});const e=m.get(k);e.tot+=valFn(r);e.count++});
+ rows.forEach(r=>{const k=keyFn(r);if(!k)return;if(!m.has(k))m.set(k,{key:labelFn?labelFn(r):k,id:idFn?idFn(r):k,tot:0,count:0});const e=m.get(k);e.tot+=valFn(r);e.count++});
  return m
+}
+async function statSearch(q){
+ home();
+ $('#gsearch').value=q;
+ await gsearch(true);
+ $('#gsearch').scrollIntoView({behavior:'smooth',block:'start'})
 }
 function computeRebalance(rows){
  const groups=new Map();
@@ -228,7 +235,7 @@ function computeRebalance(rows){
   const nome=String(r.nome||'').trim();if(!nome)return;
   const colore=String(r.colore||'').trim();
   const key=nome.toLowerCase()+'|'+colore.toLowerCase();
-  if(!groups.has(key))groups.set(key,{label:nome+(colore?` (${colore})`:''),perHouse:new Map(),total:0});
+  if(!groups.has(key))groups.set(key,{nome,label:nome+(colore?` (${colore})`:''),perHouse:new Map(),total:0});
   const g=groups.get(key);
   g.total+=r.quantita||0;
   g.perHouse.set(r.casa_id,(g.perHouse.get(r.casa_id)||0)+(r.quantita||0))
@@ -244,7 +251,7 @@ function rebalanceHtml(rows){
    const q=g.perHouse.get(h.id)||0,cls=q===0?'zero':(q===max&&max>0?'max':'');
    return`<span class="hpill ${cls}">${esc(h.nome)} ${q}</span>`
   }).join('');
-  return`<div class="rebalance-row"><div class="rname">${esc(g.label)}</div><div class="hpills">${pills}</div></div>`
+  return`<button type="button" class="rebalance-row" data-q="${esc(g.nome)}"><div class="rname">${esc(g.label)}</div><div class="hpills">${pills}</div></button>`
  }).join('')
 }
 async function loadStats(){
@@ -256,20 +263,24 @@ async function loadStats(){
  const byName=[...groupSum(rows,r=>String(r.nome||'').trim().toLowerCase(),r=>r.quantita||0,r=>String(r.nome||'').trim()||'Senza nome').values()].sort((a,b)=>b.tot-a.tot).slice(0,10);
  const byCat=[...groupSum(rows,r=>String(r.categoria||'').trim()||'Senza categoria',r=>r.quantita||0).values()].sort((a,b)=>b.tot-a.tot).slice(0,10);
  const byBrand=[...groupSum(rows,r=>String(r.marca||'').trim()||'Senza marca',r=>r.quantita||0).values()].sort((a,b)=>b.tot-a.tot).slice(0,10);
- const byHouse=[...groupSum(rows,r=>houses.find(h=>h.id===r.casa_id)?.nome||'Sconosciuta',r=>r.quantita||0).values()].sort((a,b)=>b.tot-a.tot);
+ const byHouse=[...groupSum(rows,r=>r.casa_id,r=>r.quantita||0,r=>houses.find(h=>h.id===r.casa_id)?.nome||'Sconosciuta').values()].sort((a,b)=>b.tot-a.tot);
  const duplicateNames=byName.filter(x=>x.count>1);
- const bar=(label,tot,max)=>`<div class="barrow"><span class="lbl">${esc(label)}</span><div class="bar"><b style="width:${Math.max(4,Math.round(tot/max*100))}%"></b></div><span class="val">${tot}</span></div>`;
+ const bar=(label,tot,max,attr)=>`<button type="button" class="barrow" ${attr}><span class="lbl">${esc(label)}</span><div class="bar"><b style="width:${Math.max(4,Math.round(tot/max*100))}%"></b></div><span class="val">${tot}</span></button>`;
  const maxName=Math.max(1,...byName.map(x=>x.tot)),maxCat=Math.max(1,...byCat.map(x=>x.tot)),maxBrand=Math.max(1,...byBrand.map(x=>x.tot)),maxHouse=Math.max(1,...byHouse.map(x=>x.tot));
  $('#statscontent').innerHTML=`
   <div class="card statcard"><b>Totale</b><span class="sub">${totalPieces} pezzi in ${rows.length} voci, in ${houses.length} case</span></div>
-  <div class="card statcard"><b>Da riequilibrare tra le case</b><span class="sub">Capi concentrati in una casa: valuta di spostarne un po' nelle altre</span>${rebalanceHtml(rows)}</div>
-  <div class="card statcard"><b>Cosa hai di più</b><span class="sub">I nomi di capi con più pezzi in totale</span>${byName.length?byName.map(x=>bar(x.key+(x.count>1?` ×${x.count}`:''),x.tot,maxName)).join(''):'<div class="muted">Nessun dato</div>'}</div>
-  <div class="card statcard"><b>Capi con lo stesso nome</b><span class="sub">Voci diverse che condividono lo stesso nome</span>${duplicateNames.length?duplicateNames.map(x=>`<div style="font-size:12px;padding:3px 0">${esc(x.key)} — ${x.count} voci, ${x.tot} pezzi totali</div>`).join(''):'<div class="muted">Nessun doppione</div>'}</div>
-  <div class="card statcard"><b>Per categoria</b><span class="sub">Quanti pezzi per categoria</span>${byCat.length?byCat.map(x=>bar(x.key,x.tot,maxCat)).join(''):'<div class="muted">Nessun dato</div>'}</div>
-  <div class="card statcard"><b>Per marca</b><span class="sub">Quanti pezzi per marca</span>${byBrand.length?byBrand.map(x=>bar(x.key,x.tot,maxBrand)).join(''):'<div class="muted">Nessun dato</div>'}</div>
-  <div class="card statcard"><b>Per casa</b><span class="sub">Quanti pezzi in ciascuna casa</span>${byHouse.length?byHouse.map(x=>bar(x.key,x.tot,maxHouse)).join(''):'<div class="muted">Nessun dato</div>'}</div>
+  <div class="card statcard"><b>Da riequilibrare tra le case</b><span class="sub">Capi concentrati in una casa: clicca per vederli e spostarne un po' nelle altre</span>${rebalanceHtml(rows)}</div>
+  <div class="card statcard"><b>Cosa hai di più</b><span class="sub">Clicca un nome per vedere tutti i capi (unità × quantità = totale)</span>${byName.length?byName.map(x=>bar(x.key+(x.count>1?` · ${x.count} unità`:''),x.tot,maxName,`data-q="${esc(x.key)}"`)).join(''):'<div class="muted">Nessun dato</div>'}</div>
+  <div class="card statcard"><b>Capi con lo stesso nome</b><span class="sub">Voci diverse che condividono lo stesso nome</span>${duplicateNames.length?duplicateNames.map(x=>`<button type="button" class="duprow" data-q="${esc(x.key)}"><span>${esc(x.key)}</span><span class="muted">${x.count} unità, ${x.tot} pezzi totali</span></button>`).join(''):'<div class="muted">Nessun doppione</div>'}</div>
+  <div class="card statcard"><b>Per categoria</b><span class="sub">Quanti pezzi per categoria</span>${byCat.length?byCat.map(x=>bar(x.key,x.tot,maxCat,`data-q="${esc(x.key)}"`)).join(''):'<div class="muted">Nessun dato</div>'}</div>
+  <div class="card statcard"><b>Per marca</b><span class="sub">Quanti pezzi per marca</span>${byBrand.length?byBrand.map(x=>bar(x.key,x.tot,maxBrand,`data-q="${esc(x.key)}"`)).join(''):'<div class="muted">Nessun dato</div>'}</div>
+  <div class="card statcard"><b>Per casa</b><span class="sub">Clicca una casa per aprirla</span>${byHouse.length?byHouse.map(x=>bar(x.key,x.tot,maxHouse,`data-h="${x.id}"`)).join(''):'<div class="muted">Nessun dato</div>'}</div>
  `
 }
+$('#statscontent').onclick=e=>{
+ const q=e.target.closest('[data-q]');if(q)return statSearch(q.dataset.q);
+ const h=e.target.closest('[data-h]');if(h)openHouse(h.dataset.h)
+};
 async function history(){const{data,error}=await sb.rpc('spostamenti_recenti_v23',{p_limit:60});if(error)return alert(error.message);const rows=data||[];lastBatch=rows[0]?.batch_id||null;if(!rows.length){$('#hist').innerHTML='<div class="empty">Nessuno spostamento recente</div>';$('#undo').style.display='none';$('#histdlg').showModal();return}const groups=[];for(const r of rows){let g=groups.find(x=>x.batch_id===r.batch_id);if(!g){g={batch_id:r.batch_id,created_at:r.created_at,from:r.da_casa_nome||'Casa',to:r.a_casa_nome||'Casa',items:[]};groups.push(g)}g.items.push(r)}$('#hist').innerHTML=groups.map((g,idx)=>`<div class="card" style="padding:12px;margin-bottom:10px"><b>${esc(g.from)} → ${esc(g.to)}</b><div class="meta">${new Date(g.created_at).toLocaleString('it-IT')}</div><div style="margin-top:7px">${g.items.map(x=>`<div>${esc(x.nome)}${x.marca?' · '+esc(x.marca):''} × ${x.quantita}</div>`).join('')}</div>${idx===0?'<div class="meta" style="margin-top:6px">Ultimo spostamento</div>':''}</div>`).join('');$('#undo').style.display=lastBatch?'inline-block':'none';$('#histdlg').showModal()}
 $('#logout').addEventListener('click',()=>sb.auth.signOut());$('#back').onclick=home;$('#add').onclick=()=>openItem();
 $('#all').onclick=async()=>{mode='all';opencat=null;$('#catfilter').value='';await loadItems(true);renderHouse()};
