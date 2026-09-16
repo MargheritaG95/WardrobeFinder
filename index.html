@@ -1,5 +1,5 @@
 <!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#171717"><link rel="manifest" href="./manifest.json"><link rel="apple-touch-icon" href="./icon-192.png"><title>Guardaroba</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <style>
 :root{--bg:#f6f5f1;--card:#fff;--text:#202124;--muted:#737373;--line:#e4e1da;--dark:#171717;--soft:#eceae4;--danger:#991b1b}*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text)}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{max-width:1120px;margin:auto;padding:12px}.view{display:none}.view.active{display:block}.card{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 6px 20px #0000000a}header,.topbar,.row,.toolbar,.modebar,.actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}header{justify-content:space-between;margin-bottom:13px}h1{font-size:30px;margin:0}h2{margin:0}.muted,.meta{color:var(--muted);font-size:11px}.grow{flex:1}.primary,.ghost,.soft,.danger{border:0;border-radius:10px;padding:9px 11px;font-weight:750}.primary{background:#171717;color:#fff}.ghost{background:#fff;border:1px solid var(--line)}.soft{background:var(--soft)}.danger{background:#fee2e2;color:var(--danger)}.auth{max-width:420px;margin:10vh auto;padding:22px}.auth input{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;margin:5px 0}
 .global{margin-bottom:12px}.global input{width:100%;padding:12px;border:1px solid var(--line);border-radius:13px}.results{display:grid;gap:6px;margin-top:6px}.hit{padding:9px;display:flex;text-align:left;align-items:center;gap:8px}
@@ -12,7 +12,7 @@ dialog{border:0;border-radius:17px;padding:0;width:min(550px,calc(100% - 18px));
 @media(max-width:600px){.app{padding:8px}.houses{grid-template-columns:repeat(2,1fr);gap:6px}.house{min-height:105px;padding:9px}.grid{grid-template-columns:repeat(3,1fr);gap:5px}.body h3{font-size:10px}.meta{font-size:9px}.topbar h2{font-size:17px}.toolbar{display:grid;grid-template-columns:1fr auto}.toolbar input{grid-column:1/-1;width:100%}.modebar{display:grid;grid-template-columns:1fr 1fr}.cats{grid-template-columns:repeat(2,1fr)}.fields{grid-template-columns:1fr}.full{grid-column:auto}}
 </style></head><body><div id="busy">Caricamento…</div><div class="app">
 <section id="auth" class="view active"><div class="card auth"><h2>Guardaroba</h2><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password"><div class="row"><button id="login" class="primary">Accedi</button><button id="signup" class="ghost">Crea account</button></div><div id="authmsg" class="muted"></div></div></section>
-<section id="app" class="view"><header><div><h1>Guardaroba</h1><div class="muted"><span id="user"></span> · versione 2.3</div></div><div class="row"><button id="bagBtn" class="soft">🧳 Valigia</button><button id="excelBtn" class="ghost">Excel</button><button id="logout" class="ghost">Esci</button></div></header><input id="excel" type="file" accept=".xlsx,.xls" hidden>
+<section id="app" class="view"><header><div><h1>Guardaroba</h1><div class="muted"><span id="user"></span> · versione 2.4</div></div><div class="row"><button id="bagBtn" class="soft">🧳 Valigia</button><button id="excelBtn" class="ghost">Excel</button><button id="backupBtn" class="ghost">💾 Backup</button><button id="restoreBtn" class="ghost">⬆️ Ripristina</button><button id="logout" class="ghost">Esci</button></div></header><input id="excel" type="file" accept=".xlsx,.xls" hidden><input id="restoreFile" type="file" accept=".zip" hidden>
 <section id="home" class="view active"><div class="global"><input id="gsearch" placeholder="🔎 Cerca in tutte le case…"><div id="gres" class="results"></div><button id="gmore" class="ghost more" style="display:none">Altri risultati</button></div><div id="houses" class="houses"></div></section>
 <section id="house" class="view"><div class="topbar"><button id="back" class="ghost">←</button><h2 id="htitle"></h2><div class="grow"></div><button id="historyBtn" class="ghost">↩</button><button id="deletehouse" class="danger">🗑 Casa</button><button id="add" class="primary">＋</button></div><div class="modebar"><button id="all" class="ghost active">Tutti i capi</button><button id="categories" class="ghost">Categorie</button></div><div id="catgrid" class="cats" style="display:none"></div><div id="controls"><div class="toolbar"><input id="search" placeholder="Cerca in questa casa…"><select id="catfilter"><option value="">Tutte le categorie</option></select><button id="selectall" class="ghost">✓ Tutti</button></div><div id="items" class="grid"></div><button id="more" class="ghost more" style="display:none">Carica altri</button></div><div id="transfer" class="transfer"><b id="selcount"></b><div class="grow"></div><select id="dest"></select><button id="move" class="soft">Sposta</button></div></section>
 <section id="bag" class="view"><div class="topbar"><button id="bagback" class="ghost">←</button><h2>🧳 Valigia</h2><div class="grow"></div><button id="clearbag" class="danger">Svuota</button></div><div class="muted" style="margin-bottom:8px">Lista virtuale: non modifica la posizione fisica dei capi.</div><div id="baglist" class="baglist"></div><button id="bagmore" class="ghost more" style="display:none">Carica altri</button><div class="bagbar"><b id="bagsel">0 selezionati</b><div class="grow"></div><select id="bagdest"></select><button id="bagmove" class="soft">Sposta selezionati</button></div></section></section></div>
@@ -149,5 +149,73 @@ $('#search').oninput=()=>{clearTimeout(gtimer);gtimer=setTimeout(async()=>{await
 $('#camera').onclick=()=>$('#pcamera').click();$('#library').onclick=()=>$('#plibrary').click();function prev(e){const f=e.target.files[0];if(f){$('#preview').src=URL.createObjectURL(f);$('#preview').style.display='block'}}$('#pcamera').onchange=prev;$('#plibrary').onchange=prev;$('#closeitem').onclick=$('#cancelitem').onclick=()=>$('#itemdlg').close();$('#deleteitem').onclick=async()=>{const id=$('#itemid').value;if(!confirm('Eliminare?'))return;const{error}=await sb.from('vestiti').delete().eq('id',id);if(error)return alert(error.message);$('#itemdlg').close();await Promise.all([loadHouses(),cats(),loadItems(true)]);renderHouse()};
 $('#bagBtn').onclick=async()=>{page('bag');await loadBag(true)};$('#bagback').onclick=home;$('#bagmore').onclick=()=>loadBag(false);$('#clearbag').onclick=async()=>{if(confirm('Svuotare la Valigia?')){await sb.from('valigia').delete().eq('user_id',user.id);await loadBag(true)}};$('#bagmove').onclick=moveBag;$('#gsearch').oninput=()=>{clearTimeout(gtimer);gtimer=setTimeout(()=>gsearch(true),220)};$('#gmore').onclick=()=>gsearch(false);$('#historyBtn').onclick=history;$('#closehist').onclick=()=>$('#histdlg').close();$('#undo').onclick=async()=>{if(!lastBatch)return;busy(true);const{error}=await sb.rpc('annulla_trasferimento_batch',{p_batch:lastBatch});busy(false);if(error)return alert(error.message);$('#histdlg').close();await Promise.all([loadHouses(),cats(),loadItems(true)]);renderHouse()};
 $('#excelBtn').onclick=()=>$('#excel').click();$('#excel').onchange=async e=>{const f=e.target.files[0];if(!f)return;busy(true);try{const wb=XLSX.read(await f.arrayBuffer(),{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});for(const raw of rows){const n={};Object.keys(raw).forEach(k=>n[k.trim().toLowerCase()]=raw[k]);const hn=String(n.casa||'').trim(),nome=String(n['nome capo']||n.nome||'').trim();if(!hn||!nome)continue;let h=houses.find(x=>x.nome.toLowerCase()===hn.toLowerCase());if(!h){const r=await sb.from('case').insert({user_id:user.id,nome:hn,icona:'🏠'}).select().single();if(r.error)throw r.error;h=r.data;houses.push(h)}const r=await sb.from('vestiti').insert({user_id:user.id,casa_id:h.id,nome,marca:String(n.marca||'').trim()||null,categoria:String(n.categoria||'').trim()||null,quantita:Math.max(1,parseInt(n['quantità']||n.quantita||1)||1),colore:String(n.colore||'').trim()||null,descrizione:String(n.descrizione||n.note||'').trim()||null});if(r.error)throw r.error}await loadHouses();home();alert('Importazione completata')}catch(x){alert(x.message||x)}finally{busy(false)}};
+async function exportBackup(){
+ busy(true);
+ try{
+  const [hr,ir,br]=await Promise.all([
+   sb.from('case').select('*').eq('user_id',user.id),
+   sb.from('vestiti').select('*').eq('user_id',user.id),
+   sb.from('valigia').select('*').eq('user_id',user.id)
+  ]);
+  if(hr.error)throw hr.error;if(ir.error)throw ir.error;if(br.error)throw br.error;
+  const allHouses=hr.data||[],allItems=ir.data||[],allBag=br.data||[];
+  const zip=new JSZip(),photos=zip.folder('foto'),paths=new Set();
+  allHouses.forEach(h=>{if(h.foto_path)paths.add(h.foto_path)});
+  allItems.forEach(i=>{if(i.foto_path)paths.add(i.foto_path);if(i.thumbnail_path)paths.add(i.thumbnail_path)});
+  for(const p of paths){
+   try{const{data,error}=await sb.storage.from('foto-vestiti').download(p);if(!error&&data)photos.file(p,data)}catch(_){}
+  }
+  zip.file('dati.json',JSON.stringify({app:'WardrobeFinder',formato:1,esportato_il:new Date().toISOString(),utente:user.email||null,case:allHouses,vestiti:allItems,valigia:allBag},null,2));
+  const blob=await zip.generateAsync({type:'blob'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=`guardaroba-backup-${new Date().toISOString().slice(0,10)}.zip`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+ }catch(err){alert('Errore backup: '+(err?.message||String(err)))}finally{busy(false)}
+}
+async function restorePhoto(zip,oldPath){
+ if(!oldPath)return null;
+ const entry=zip.file('foto/'+oldPath);if(!entry)return null;
+ try{
+  const blob=await entry.async('blob'),name=oldPath.split('/').pop()||'foto.jpg',newPath=`${user.id}/${crypto.randomUUID()}/${name}`;
+  const{error}=await sb.storage.from('foto-vestiti').upload(newPath,blob,{contentType:blob.type||'image/jpeg',cacheControl:'31536000'});
+  if(error)return null;
+  return newPath
+ }catch(_){return null}
+}
+async function importBackup(file){
+ if(!confirm('Verranno aggiunti i dati e le foto del file di backup a quelli già presenti: nessun dato esistente verrà cancellato o sovrascritto. Continuare?'))return;
+ busy(true);
+ try{
+  const zip=await JSZip.loadAsync(file),mf=zip.file('dati.json');
+  if(!mf)throw new Error('File di backup non valido: manca dati.json.');
+  const manifest=JSON.parse(await mf.async('string')),backupHouses=manifest.case||[],backupItems=manifest.vestiti||[],backupBag=manifest.valigia||[];
+  const houseIdMap={},itemIdMap={};
+  for(const h of backupHouses){
+   let target=houses.find(x=>String(x.nome||'').trim().toLowerCase()===String(h.nome||'').trim().toLowerCase());
+   if(!target){
+    const fotoPath=h.foto_path?await restorePhoto(zip,h.foto_path):null;
+    const{data,error}=await sb.from('case').insert({user_id:user.id,nome:h.nome,icona:h.icona||'🏠',foto_path:fotoPath}).select().single();
+    if(error)throw error;
+    target=data;houses.push(target)
+   }
+   houseIdMap[h.id]=target.id
+  }
+  for(const it of backupItems){
+   const casaId=houseIdMap[it.casa_id];if(!casaId)continue;
+   const fotoPath=it.foto_path?await restorePhoto(zip,it.foto_path):null,thumbPath=it.thumbnail_path?await restorePhoto(zip,it.thumbnail_path):null;
+   const{data,error}=await sb.from('vestiti').insert({user_id:user.id,casa_id:casaId,nome:it.nome,marca:it.marca||null,categoria:it.categoria||null,quantita:it.quantita||1,colore:it.colore||null,descrizione:it.descrizione||null,foto_path:fotoPath,thumbnail_path:thumbPath}).select().single();
+   if(error)throw error;
+   itemIdMap[it.id]=data.id
+  }
+  for(const b of backupBag){
+   const newItemId=itemIdMap[b.vestito_id];if(!newItemId)continue;
+   const qty=b.quantita_valigia||b.quantita||1;
+   try{await sb.rpc('aggiungi_a_valigia',{p_vestito:newItemId,p_quantita:qty})}catch(_){}
+  }
+  await loadHouses();home();
+  alert(`Ripristino completato: ${backupHouses.length} case e ${backupItems.length} capi elaborati (nessun dato precedente è stato modificato o cancellato).`)
+ }catch(err){alert('Errore ripristino: '+(err?.message||String(err)))}finally{busy(false)}
+}
+$('#backupBtn').onclick=exportBackup;
+$('#restoreBtn').onclick=()=>$('#restoreFile').click();
+$('#restoreFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)importBackup(f)};
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));init();
 </script></body></html>
