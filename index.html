@@ -5,7 +5,7 @@
 .global{margin-bottom:12px}.global input{width:100%;padding:12px;border:1px solid var(--line);border-radius:13px}.results{display:grid;gap:6px;margin-top:6px}.hit{padding:9px;display:flex;text-align:left;align-items:center;gap:8px}
 .houses{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:9px}.house{padding:13px;min-height:120px;text-align:left;display:flex;flex-direction:column;justify-content:space-between}.ico{width:48px;height:48px;border-radius:12px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden}.ico img{width:100%;height:100%;object-fit:cover}.name{font-weight:850;margin-top:7px}.new{border-style:dashed;background:transparent;align-items:center;justify-content:center}
 .topbar{margin-bottom:9px}.modebar,.toolbar{margin-bottom:8px}.modebar .active{background:#171717;color:#fff}.toolbar input,.toolbar select{padding:8px;border:1px solid var(--line);border-radius:9px;background:#fff}.toolbar input{flex:1;min-width:160px}
-.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px}.cat{padding:12px;text-align:left;min-height:100px}.folder{font-size:29px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:7px}.item{overflow:hidden;position:relative}.thumb{aspect-ratio:1/1;background:#eae8e2;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:10px;color:#999}.thumb img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .15s}.thumb img.loaded{opacity:1}.body{padding:7px}.body h3{font-size:12px;margin:0 0 3px}.ia{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:5px}.ia button{font-size:10px;padding:5px 2px}.check{position:absolute;top:5px;left:5px;width:19px;height:19px;z-index:2;accent-color:#111}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px}.cat{padding:12px;text-align:left;min-height:100px}.folder{font-size:29px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:7px}.item{overflow:hidden;position:relative}.thumb{aspect-ratio:1/1;background:#eae8e2;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:10px;color:#999}.thumb img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .15s}.thumb img.loaded{opacity:1}.body{padding:7px}.body h3{font-size:12px;margin:0 0 3px}.ia{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:5px}.ia button{font-size:9px;padding:5px 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.check{position:absolute;top:5px;left:5px;width:19px;height:19px;z-index:2;accent-color:#111}
 .transfer{display:none;position:sticky;bottom:7px;background:#171717;color:#fff;border-radius:13px;padding:8px;gap:6px;align-items:center;margin-top:8px;z-index:5}.transfer.show{display:flex}.transfer select{padding:7px;border:0;border-radius:8px}.more{display:block;margin:10px auto}.empty{text-align:center;padding:30px;color:var(--muted);grid-column:1/-1}
 dialog{border:0;border-radius:17px;padding:0;width:min(550px,calc(100% - 18px));box-shadow:0 30px 80px #0005}dialog::backdrop{background:#0006}.dialog{padding:17px}.formhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}.full{grid-column:1/-1}label{display:block;font-size:11px;font-weight:800;margin-bottom:3px}.fields input,.fields select,.fields textarea{width:100%;padding:8px;border:1px solid var(--line);border-radius:9px}.photoactions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.preview{display:none;width:100%;max-height:340px;object-fit:cover;border-radius:10px;margin-top:6px;cursor:zoom-in}.actions{justify-content:flex-end;margin-top:11px}
 .snow{display:flex;gap:2px}.snowbtn{background:none;border:0;font-size:22px;line-height:1;cursor:pointer;opacity:.3;padding:6px}.snowbtn.on{opacity:1}
@@ -13,7 +13,9 @@ dialog{border:0;border-radius:17px;padding:0;width:min(550px,calc(100% - 18px));
 .item{cursor:pointer}
 .lightbox{position:fixed;inset:0;background:#000c;z-index:200;display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}.lightbox.show{display:flex}.lightbox img{max-width:100%;max-height:100%;border-radius:12px;object-fit:contain}
 .crumbs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;font-size:12px}.crumbs button{background:none;border:0;color:#171717;font-weight:750;cursor:pointer;padding:2px 0}
-.stats{display:grid;gap:10px}.statcard b{display:block;margin-bottom:6px}.barrow{display:flex;align-items:center;gap:8px;margin:4px 0}.barrow .bar{height:8px;background:var(--soft);border-radius:4px;flex:1;overflow:hidden}.barrow .bar b{display:block;height:100%;background:#171717;margin:0}
+.stats{display:grid;gap:12px}.statcard{padding:16px}.statcard>b{display:block;font-size:14px;margin-bottom:2px}.statcard .sub{display:block;color:var(--muted);font-size:11px;margin-bottom:10px}
+.barrow{display:flex;align-items:center;gap:8px;margin:6px 0}.barrow .lbl{width:100px;flex:none;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.barrow .bar{height:8px;background:var(--soft);border-radius:4px;flex:1;overflow:hidden}.barrow .bar b{display:block;height:100%;background:#171717;margin:0;border-radius:4px}.barrow .val{width:26px;flex:none;text-align:right;font-size:11px;font-weight:750}
+.rebalance-row{padding:10px 0;border-top:1px solid var(--line)}.rebalance-row:first-child{border-top:0;padding-top:2px}.rebalance-row .rname{font-size:12px;font-weight:750;margin-bottom:6px}.hpills{display:flex;flex-wrap:wrap;gap:6px}.hpill{border-radius:8px;padding:3px 9px;font-size:11px;font-weight:750;background:var(--soft)}.hpill.zero{background:transparent;border:1px dashed var(--line);color:var(--muted);font-weight:600}.hpill.max{background:#171717;color:#fff}
 .baglist{display:grid;gap:7px}.bagrow{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:9px}.bagrow input[type=number]{width:55px;padding:5px;border:1px solid var(--line);border-radius:7px}.bagbar{position:sticky;bottom:7px;background:#171717;color:#fff;border-radius:13px;padding:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}.bagbar select{padding:7px;border:0;border-radius:8px}#busy{position:fixed;inset:0;background:#ffffffb8;z-index:99;display:none;align-items:center;justify-content:center;font-weight:850}#busy.show{display:flex}
 @media(max-width:600px){.app{padding:8px}.houses{grid-template-columns:repeat(2,1fr);gap:6px}.house{min-height:105px;padding:9px}.grid{grid-template-columns:repeat(3,1fr);gap:5px}.body h3{font-size:10px}.meta{font-size:9px}.topbar h2{font-size:17px}.toolbar{display:grid;grid-template-columns:1fr auto}.toolbar input{grid-column:1/-1;width:100%}.modebar{display:grid;grid-template-columns:1fr 1fr}.cats{grid-template-columns:repeat(2,1fr)}.fields{grid-template-columns:1fr}.full{grid-column:auto}}
 </style></head><body><div id="busy">Caricamento…</div><div class="app">
@@ -220,6 +222,31 @@ function groupSum(rows,keyFn,valFn,labelFn){
  rows.forEach(r=>{const k=keyFn(r);if(!k)return;if(!m.has(k))m.set(k,{key:labelFn?labelFn(r):k,tot:0,count:0});const e=m.get(k);e.tot+=valFn(r);e.count++});
  return m
 }
+function computeRebalance(rows){
+ const groups=new Map();
+ rows.forEach(r=>{
+  const nome=String(r.nome||'').trim();if(!nome)return;
+  const colore=String(r.colore||'').trim();
+  const key=nome.toLowerCase()+'|'+colore.toLowerCase();
+  if(!groups.has(key))groups.set(key,{label:nome+(colore?` (${colore})`:''),perHouse:new Map(),total:0});
+  const g=groups.get(key);
+  g.total+=r.quantita||0;
+  g.perHouse.set(r.casa_id,(g.perHouse.get(r.casa_id)||0)+(r.quantita||0))
+ });
+ return[...groups.values()].filter(g=>g.total>=2&&g.perHouse.size<houses.length).sort((a,b)=>b.total-a.total).slice(0,12)
+}
+function rebalanceHtml(rows){
+ const groups=computeRebalance(rows);
+ if(!groups.length)return'<div class="muted">Nessun capo molto sbilanciato tra le case al momento.</div>';
+ return groups.map(g=>{
+  const max=Math.max(0,...g.perHouse.values());
+  const pills=houses.map(h=>{
+   const q=g.perHouse.get(h.id)||0,cls=q===0?'zero':(q===max&&max>0?'max':'');
+   return`<span class="hpill ${cls}">${esc(h.nome)} ${q}</span>`
+  }).join('');
+  return`<div class="rebalance-row"><div class="rname">${esc(g.label)}</div><div class="hpills">${pills}</div></div>`
+ }).join('')
+}
 async function loadStats(){
  $('#statscontent').innerHTML='<div class="empty">Calcolo…</div>';
  const{data,error}=await sb.from('vestiti').select('nome,categoria,marca,colore,quantita,casa_id').eq('user_id',user.id);
@@ -231,15 +258,16 @@ async function loadStats(){
  const byBrand=[...groupSum(rows,r=>String(r.marca||'').trim()||'Senza marca',r=>r.quantita||0).values()].sort((a,b)=>b.tot-a.tot).slice(0,10);
  const byHouse=[...groupSum(rows,r=>houses.find(h=>h.id===r.casa_id)?.nome||'Sconosciuta',r=>r.quantita||0).values()].sort((a,b)=>b.tot-a.tot);
  const duplicateNames=byName.filter(x=>x.count>1);
- const bar=(label,tot,max)=>`<div class="barrow"><div style="width:110px" class="meta">${esc(label)}</div><div class="bar"><b style="width:${Math.max(4,Math.round(tot/max*100))}%"></b></div><b style="font-size:11px">${tot}</b></div>`;
+ const bar=(label,tot,max)=>`<div class="barrow"><span class="lbl">${esc(label)}</span><div class="bar"><b style="width:${Math.max(4,Math.round(tot/max*100))}%"></b></div><span class="val">${tot}</span></div>`;
  const maxName=Math.max(1,...byName.map(x=>x.tot)),maxCat=Math.max(1,...byCat.map(x=>x.tot)),maxBrand=Math.max(1,...byBrand.map(x=>x.tot)),maxHouse=Math.max(1,...byHouse.map(x=>x.tot));
  $('#statscontent').innerHTML=`
-  <div class="card statcard"><b>Totale</b><div class="muted">${totalPieces} pezzi in ${rows.length} voci, in ${houses.length} case</div></div>
-  <div class="card statcard"><b>Cosa hai di più</b>${byName.length?byName.map(x=>bar(x.key+(x.count>1?` ×${x.count}`:''),x.tot,maxName)).join(''):'<div class="muted">Nessun dato</div>'}</div>
-  <div class="card statcard"><b>Capi con lo stesso nome</b>${duplicateNames.length?duplicateNames.map(x=>`<div>${esc(x.key)} — ${x.count} voci, ${x.tot} pezzi totali</div>`).join(''):'<div class="muted">Nessun doppione</div>'}</div>
-  <div class="card statcard"><b>Per categoria</b>${byCat.length?byCat.map(x=>bar(x.key,x.tot,maxCat)).join(''):'<div class="muted">Nessun dato</div>'}</div>
-  <div class="card statcard"><b>Per marca</b>${byBrand.length?byBrand.map(x=>bar(x.key,x.tot,maxBrand)).join(''):'<div class="muted">Nessun dato</div>'}</div>
-  <div class="card statcard"><b>Per casa</b>${byHouse.length?byHouse.map(x=>bar(x.key,x.tot,maxHouse)).join(''):'<div class="muted">Nessun dato</div>'}</div>
+  <div class="card statcard"><b>Totale</b><span class="sub">${totalPieces} pezzi in ${rows.length} voci, in ${houses.length} case</span></div>
+  <div class="card statcard"><b>Da riequilibrare tra le case</b><span class="sub">Capi concentrati in una casa: valuta di spostarne un po' nelle altre</span>${rebalanceHtml(rows)}</div>
+  <div class="card statcard"><b>Cosa hai di più</b><span class="sub">I nomi di capi con più pezzi in totale</span>${byName.length?byName.map(x=>bar(x.key+(x.count>1?` ×${x.count}`:''),x.tot,maxName)).join(''):'<div class="muted">Nessun dato</div>'}</div>
+  <div class="card statcard"><b>Capi con lo stesso nome</b><span class="sub">Voci diverse che condividono lo stesso nome</span>${duplicateNames.length?duplicateNames.map(x=>`<div style="font-size:12px;padding:3px 0">${esc(x.key)} — ${x.count} voci, ${x.tot} pezzi totali</div>`).join(''):'<div class="muted">Nessun doppione</div>'}</div>
+  <div class="card statcard"><b>Per categoria</b><span class="sub">Quanti pezzi per categoria</span>${byCat.length?byCat.map(x=>bar(x.key,x.tot,maxCat)).join(''):'<div class="muted">Nessun dato</div>'}</div>
+  <div class="card statcard"><b>Per marca</b><span class="sub">Quanti pezzi per marca</span>${byBrand.length?byBrand.map(x=>bar(x.key,x.tot,maxBrand)).join(''):'<div class="muted">Nessun dato</div>'}</div>
+  <div class="card statcard"><b>Per casa</b><span class="sub">Quanti pezzi in ciascuna casa</span>${byHouse.length?byHouse.map(x=>bar(x.key,x.tot,maxHouse)).join(''):'<div class="muted">Nessun dato</div>'}</div>
  `
 }
 async function history(){const{data,error}=await sb.rpc('spostamenti_recenti_v23',{p_limit:60});if(error)return alert(error.message);const rows=data||[];lastBatch=rows[0]?.batch_id||null;if(!rows.length){$('#hist').innerHTML='<div class="empty">Nessuno spostamento recente</div>';$('#undo').style.display='none';$('#histdlg').showModal();return}const groups=[];for(const r of rows){let g=groups.find(x=>x.batch_id===r.batch_id);if(!g){g={batch_id:r.batch_id,created_at:r.created_at,from:r.da_casa_nome||'Casa',to:r.a_casa_nome||'Casa',items:[]};groups.push(g)}g.items.push(r)}$('#hist').innerHTML=groups.map((g,idx)=>`<div class="card" style="padding:12px;margin-bottom:10px"><b>${esc(g.from)} → ${esc(g.to)}</b><div class="meta">${new Date(g.created_at).toLocaleString('it-IT')}</div><div style="margin-top:7px">${g.items.map(x=>`<div>${esc(x.nome)}${x.marca?' · '+esc(x.marca):''} × ${x.quantita}</div>`).join('')}</div>${idx===0?'<div class="meta" style="margin-top:6px">Ultimo spostamento</div>':''}</div>`).join('');$('#undo').style.display=lastBatch?'inline-block':'none';$('#histdlg').showModal()}
