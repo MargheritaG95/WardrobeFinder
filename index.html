@@ -91,19 +91,37 @@ function home(){
 async function addHouse(){const nome=(prompt('Nome casa:')||'').trim();if(!nome)return;const icona=(prompt('Emoji casa:','🏠')||'🏠').trim();const {error}=await sb.from('case').insert({user_id:user.id,nome,icona});if(error)return alert(error.message);await loadHouses();home()}
 
 const signedCache=new Map();
-async function surl(p){
+async function surl(p,tries=3){
  if(!p)return null;
  if(signedCache.has(p))return signedCache.get(p);
- const {data}=await sb.storage.from('foto-vestiti').createSignedUrl(p,86400);
- const u=data?.signedUrl||null;if(u)signedCache.set(p,u);return u
+ for(let i=0;i<tries;i++){
+  try{
+   const{data,error}=await sb.storage.from('foto-vestiti').createSignedUrl(p,86400);
+   if(error)throw error;
+   const u=data?.signedUrl||null;
+   if(u){signedCache.set(p,u);return u}
+  }catch(err){console.warn('Errore URL foto',p,err);if(i<tries-1)await new Promise(r=>setTimeout(r,400*(i+1)))}
+ }
+ return null
 }
 function lazyPhotos(){
  const imgs=[...document.querySelectorAll('img[data-photo]')];
- if(!('IntersectionObserver'in window)){imgs.forEach(loadLazy);return}
+ if(!('IntersectionObserver'in window)){imgs.forEach(i=>loadLazy(i));return}
  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){loadLazy(e.target);io.unobserve(e.target)}}),{rootMargin:'250px'});
  imgs.forEach(i=>io.observe(i))
 }
-async function loadLazy(img){if(img.dataset.loaded)return;img.dataset.loaded='1';const u=await surl(img.dataset.photo);if(u){img.src=u;img.onload=()=>img.classList.add('loaded')}}
+async function loadLazy(img,attempt=0){
+ if(img.dataset.loaded)return;
+ const u=await surl(img.dataset.photo);
+ if(u){
+  img.dataset.loaded='1';
+  img.onerror=()=>{if(attempt<2){delete img.dataset.loaded;signedCache.delete(img.dataset.photo);setTimeout(()=>loadLazy(img,attempt+1),500)}};
+  img.onload=()=>img.classList.add('loaded');
+  img.src=u
+ }else if(attempt<2){
+  setTimeout(()=>loadLazy(img,attempt+1),600)
+ }
+}
 async function compressImage(file,max=1600,quality=.78){
  if(!file||!file.type.startsWith('image/'))return file;
  const bmp=await createImageBitmap(file),scale=Math.min(1,max/Math.max(bmp.width,bmp.height)),w=Math.max(1,Math.round(bmp.width*scale)),h=Math.max(1,Math.round(bmp.height*scale));
